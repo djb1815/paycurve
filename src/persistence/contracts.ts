@@ -18,6 +18,7 @@ export type ImportErrorCode =
   | 'invalidSchema'
   | 'unsupportedSchemaVersion'
   | 'unsupportedTaxYear'
+  | 'taxConfigMismatch'
   | 'migrationFailed';
 
 export interface ImportError {
@@ -45,6 +46,17 @@ export type EncodeExport = (
   exportedAt?: Date,
 ) => string;
 
-export type DecodeExport = (input: unknown) => ImportResult;
+export interface TaxConfigIdentity {
+  readonly taxYear: TaxYearId;
+  readonly taxConfigVersion: string;
+}
 
-export type MigrateExport = (input: unknown) => MigrationResult;
+export type DecodeExport = (
+  input: unknown,
+  expectedConfig?: TaxConfigIdentity,
+) => ImportResult;
+
+export type MigrateExport = (
+  input: unknown,
+  expectedConfig?: TaxConfigIdentity,
+) => MigrationResult;
