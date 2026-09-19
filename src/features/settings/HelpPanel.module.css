@@ -1,0 +1,41 @@
+.panel,
+.panel header,
+.topics {
+  display: grid;
+  gap: var(--space-3);
+}
+.panel h2,
+.panel p {
+  margin: 0;
+}
+.panel header p {
+  color: var(--colour-text-muted);
+}
+.topics details {
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-small);
+  padding: var(--space-3);
+}
+.topics summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.topics p {
+  margin: var(--space-2) 0;
+}
+.topics ul {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+}
+.topics a {
+  color: var(--colour-accent);
+}
+.external {
+  color: var(--colour-text-muted);
+  font-size: 0.875em;
+}
+@media print {
+  .panel {
+    display: none;
+  }
+}
