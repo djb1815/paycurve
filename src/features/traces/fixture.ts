@@ -26,10 +26,14 @@ export const tracesFixture: readonly CalculationTrace[] = [
       },
       {
         id: 'ani',
-        label: 'Adjusted net income',
+        code: 'adjustedNetIncome',
         formattedAmount: '£99,500',
         operation: 'result',
       },
     ],
+    total: {
+      formattedAmount: '£99,500',
+      label: 'Supplied ANI total',
+    },
   },
 ];

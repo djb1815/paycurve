@@ -45,3 +45,53 @@
 .default {
   border-inline-start: 0.25rem solid transparent;
 }
+.deltas,
+.messages {
+  display: grid;
+  gap: 0.5rem;
+}
+.deltas h3,
+.messages h3,
+.messages ul {
+  margin: 0;
+}
+.deltas {
+  overflow-x: auto;
+}
+.deltas table {
+  border-collapse: collapse;
+  min-width: 38rem;
+  width: 100%;
+}
+.deltas th,
+.deltas td {
+  border-block-end: 1px solid var(--color-border, #cbd5e1);
+  padding: 0.5rem;
+  text-align: start;
+}
+.deltas td {
+  font-variant-numeric: tabular-nums;
+}
+.messages ul {
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+.messages li {
+  border-inline-start: 0.25rem solid currentColor;
+  padding-inline-start: 0.75rem;
+}
+.severity {
+  font-weight: 700;
+}
+.messageerror {
+  color: var(--color-danger, #b91c1c);
+}
+.messagewarning {
+  color: var(--color-warning, #b45309);
+}
+.messageinformation,
+.messagepositive {
+  color: var(--color-muted, #475569);
+}

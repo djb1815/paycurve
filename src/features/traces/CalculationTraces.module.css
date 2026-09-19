@@ -40,6 +40,11 @@
   font-variant-numeric: tabular-nums;
   margin: 0;
 }
+.total {
+  border-block-start: 2px solid currentColor;
+  font-variant-numeric: tabular-nums;
+  padding-block-start: 0.5rem;
+}
 .result {
   border-block-start: 2px solid currentColor;
   font-weight: 700;
