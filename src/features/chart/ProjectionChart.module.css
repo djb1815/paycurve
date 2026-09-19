@@ -1,49 +1,190 @@
 .panel,
 .panel header,
-.selector {
+.selector,
+.selectedSummary,
+.figure,
+.markers {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--space-3, 0.75rem);
 }
+
 .panel h2,
-.panel p {
+.panel h3,
+.panel p,
+.panel dl,
+.figure {
   margin: 0;
 }
+
 .eyebrow {
-  color: var(--color-accent, #3157a4);
+  color: var(--colour-accent, #075e54);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
 .selector {
   font-weight: 700;
 }
-.selector input {
-  inline-size: 100%;
+
+.selector select {
+  background: var(--colour-surface, #fff);
+  border: 1px solid var(--colour-border, #c8d1ca);
+  border-radius: var(--radius-small, 0.4rem);
+  min-block-size: 2.75rem;
+  padding-inline: var(--space-2, 0.5rem);
 }
+
+.selectedSummary {
+  background: var(--colour-surface-subtle, #e9eee8);
+  border-inline-start: 0.3rem solid var(--colour-accent, #075e54);
+  padding: var(--space-3, 0.75rem);
+}
+
+.selectedSummary dl {
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+.selectedSummary dl > div {
+  display: grid;
+  gap: var(--space-1, 0.25rem);
+}
+
+.selectedSummary dt,
+.metricPlot p {
+  color: var(--colour-text-muted, #536159);
+}
+
+.selectedSummary dd {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  margin: 0;
+}
+
+.figure {
+  border: 1px solid var(--colour-border, #c8d1ca);
+  border-radius: var(--radius-medium, 0.8rem);
+  padding: var(--space-3, 0.75rem);
+}
+
+.plots {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.metricPlot {
+  border-block-start: 0.2rem solid var(--colour-border, #c8d1ca);
+  display: grid;
+  gap: var(--space-1, 0.25rem);
+  padding-block-start: var(--space-2, 0.5rem);
+}
+
+.metricPlot h3,
+.metricPlot p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.metricPlot svg {
+  display: block;
+  inline-size: 100%;
+  max-block-size: 8rem;
+}
+
+.plotBaseline {
+  stroke: var(--colour-border, #c8d1ca);
+  stroke-width: 1;
+}
+
+.plotani,
+.plotemployment,
+.plotcash,
+.plotpension {
+  stroke-width: 3;
+}
+
+.plotani {
+  fill: var(--colour-danger, #a32929);
+  stroke: var(--colour-danger, #a32929);
+}
+
+.plotemployment {
+  fill: var(--colour-accent, #075e54);
+  stroke: var(--colour-accent, #075e54);
+}
+
+.plotcash {
+  fill: var(--colour-warning, #8a4b08);
+  stroke: var(--colour-warning, #8a4b08);
+}
+
+.plotpension {
+  fill: var(--colour-positive, #17633a);
+  stroke: var(--colour-positive, #17633a);
+}
+
+.markers ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem) var(--space-4, 1rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.markers li {
+  border-inline-start: 0.25rem solid var(--colour-accent, #075e54);
+  padding-inline-start: var(--space-2, 0.5rem);
+}
+
+.status,
+.error {
+  border-inline-start: 0.3rem solid var(--colour-warning, #8a4b08);
+  padding-inline-start: var(--space-3, 0.75rem);
+}
+
+.error {
+  border-color: var(--colour-danger, #a32929);
+}
+
 .tableWrap {
   overflow-x: auto;
 }
-.tableWrap:focus-visible {
-  outline: 3px solid var(--color-focus, #2563eb);
-  outline-offset: 2px;
-}
+
 .tableWrap table {
   border-collapse: collapse;
-  min-width: 42rem;
+  min-width: 54rem;
   width: 100%;
 }
+
 .tableWrap caption {
+  margin-block-end: var(--space-2, 0.5rem);
   text-align: start;
-  margin-block-end: 0.5rem;
 }
+
 .tableWrap th,
 .tableWrap td {
-  border-block-end: 1px solid var(--color-border, #cbd5e1);
-  padding: 0.75rem;
+  border-block-end: 1px solid var(--colour-border, #c8d1ca);
+  padding: var(--space-3, 0.75rem);
   text-align: start;
 }
+
 .tableWrap tbody tr[aria-current='true'] {
-  background: var(--color-surface-muted, #eff6ff);
+  background: var(--colour-surface-subtle, #e9eee8);
   font-weight: 700;
+}
+
+@media print {
+  .selector {
+    display: none;
+  }
+
+  .figure,
+  .selectedSummary {
+    break-inside: avoid;
+  }
 }
