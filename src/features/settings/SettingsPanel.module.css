@@ -1,0 +1,55 @@
+.panel,
+.panel header {
+  display: grid;
+  gap: 1rem;
+}
+.panel h2,
+.panel p,
+.panel dl {
+  margin: 0;
+}
+.panel dl {
+  display: grid;
+  gap: 0.5rem;
+}
+.panel dl > div {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+.panel dd {
+  font-weight: 700;
+  margin: 0;
+}
+.panel fieldset {
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+.panel legend {
+  font-weight: 700;
+  padding-inline: 0.25rem;
+}
+.themes,
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.themes label {
+  align-items: center;
+  display: flex;
+  gap: 0.35rem;
+}
+.actions button {
+  border: 1px solid var(--color-accent, #3157a4);
+  border-radius: 0.375rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0.6rem 0.8rem;
+}
+.privacy {
+  color: var(--color-muted, #475569);
+  font-size: 0.875rem;
+}

@@ -1,0 +1,42 @@
+.panel {
+  display: grid;
+  gap: 1rem;
+}
+.panel header {
+  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+.panel h2,
+.panel h3,
+.panel p {
+  margin: 0;
+}
+.eyebrow {
+  color: var(--color-accent, #3157a4);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.panel article {
+  border-block-start: 1px solid var(--color-border, #cbd5e1);
+  display: grid;
+  gap: 0.4rem;
+  padding-block-start: 1rem;
+}
+.panel button {
+  background: var(--color-accent, #3157a4);
+  border: 0;
+  border-radius: 0.375rem;
+  color: var(--color-on-accent, white);
+  font: inherit;
+  padding: 0.65rem 1rem;
+}
+@media print {
+  .panel button {
+    display: none;
+  }
+}

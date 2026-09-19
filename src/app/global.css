@@ -1,0 +1,50 @@
+@import '../shared/styles/tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--colour-page);
+}
+
+body {
+  margin: 0;
+  min-width: 20rem;
+  min-height: 100vh;
+  background: var(--colour-page);
+  color: var(--colour-text);
+}
+
+button,
+input,
+select {
+  color: inherit;
+  font: inherit;
+}
+
+button,
+input,
+select,
+a {
+  outline-offset: 0.2rem;
+}
+
+:focus-visible {
+  outline: 0.18rem solid var(--focus-ring);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+@media print {
+  [data-print-hidden='true'] {
+    display: none !important;
+  }
+}

@@ -198,7 +198,7 @@ These fields are not required for the annual ANI optimisation.
 
 If they are omitted, the app should still provide an **estimated average monthly take-home** by annualising the tax model and dividing the relevant annual result across the configured pay frequency.
 
-If they are provided, the app may additionally provide a **projected monthly / next-payslip take-home** based on PAYE assumptions.
+If sufficient payroll inputs are provided, the MVP must additionally provide a **projected monthly / next-payslip take-home** based on PAYE assumptions. PAYE-aware projection is a complete MVP workstream, not a post-MVP enhancement, although the result remains optional at runtime because payroll inputs are optional.
 
 The UI should clearly label which level of estimate is being shown.
 
@@ -215,6 +215,8 @@ The model should distinguish:
 - existing regular salary sacrifice;
 - additional regular salary sacrifice being explored;
 - bonus salary sacrifice.
+
+The user must enter a **maximum additional regular salary sacrifice**. Optimisation and chart sampling must not explore above that limit, and a new plan should default the limit to zero until the user chooses it. The limit, and every resulting total sacrifice, must be validated against unsacrificed base salary. Because National Minimum Wage and employer-plan restrictions are not modelled, the UI must display a prominent limitation warning rather than implying that every amount within this limit can be implemented by payroll.
 
 ### 5.2 Personal pension / SIPP contributions
 
@@ -338,8 +340,9 @@ This scenario is intended for "what if?" analysis.
 Current, Optimal, and Alternative should be comparable at a glance using at least:
 
 - ANI;
-- annual take-home income;
-- estimated average monthly take-home;
+- annual net employment pay after salary sacrifice, Income Tax, and employee NI;
+- annual disposable cash after net SIPP contributions and Gift Aid donations;
+- matching average-period net employment pay and disposable cash figures;
 - projected monthly / next-payslip take-home where payroll inputs are available;
 - employee pension contribution;
 - total pension input where known;
@@ -367,8 +370,10 @@ type Projection = {
   personalAllowance: number;
   incomeTax: number;
   employeeNationalInsurance: number;
-  takeHomeIncome: number;
-  estimatedAverageMonthlyTakeHome: number;
+  annualNetEmploymentPay: number;
+  annualDisposableCash: number;
+  averagePeriodNetEmploymentPay: number;
+  averagePeriodDisposableCash: number;
   projectedMonthlyTakeHome?: number;
 
   employeeSalarySacrifice: number;
@@ -451,13 +456,18 @@ The application should provide two related figures.
 
 Always available.
 
-This is derived from the annual projection and is intended for planning rather than payslip reconciliation.
+This is derived from the annual projection and is intended for planning rather than payslip reconciliation. The model and UI must distinguish:
+
+- **net employment pay**: employment cash after salary sacrifice, Income Tax, and employee NI; and
+- **disposable cash**: net employment pay after subtracting net SIPP payments and Gift Aid cash donations.
+
+Annual and average-period values must use these same definitions. A generic `takeHomeIncome` field must not be used because it obscures whether post-payroll contributions and donations have been deducted.
 
 It should show the average monthly effect of the selected scenario on take-home pay.
 
 #### PAYE-aware monthly projection
 
-Optional.
+Required for MVP when sufficient optional payroll inputs have been supplied.
 
 When sufficient payroll inputs are supplied, the app should estimate monthly / next-payslip take-home using:
 
@@ -736,6 +746,7 @@ Examples:
 
 - negative income should normally be rejected unless explicitly supported;
 - sacrifice cannot exceed the compensation from which it is taken;
+- maximum additional regular sacrifice is required, defaults to zero for a new plan, and cannot exceed unsacrificed base salary;
 - bonus sacrifice cannot exceed bonus;
 - percentages must remain within valid bounds;
 - selected target should be positive;
@@ -814,7 +825,7 @@ Conceptually:
 
 ```ts
 type TaxYearConfig = {
-  id: "2026/27";
+  id: '2026/27';
 
   personalAllowance: number;
   personalAllowanceTaperThreshold: number;
@@ -1117,7 +1128,7 @@ The MVP is successful if the user can:
 8. understand why each result was produced through traces, tooltips, and contextual insights;
 9. receive useful warnings about insufficient headroom and pension allowance limits;
 10. see an estimated average monthly take-home for each scenario;
-11. optionally provide PAYE inputs and receive a more realistic monthly / next-payslip take-home projection;
+11. provide sufficient optional PAYE inputs and receive a more realistic monthly / next-payslip take-home projection;
 12. switch between System, Light, and Dark appearance modes;
 13. close and reopen the application without losing the plan or UI preferences;
 14. export and later restore the plan as versioned JSON; and

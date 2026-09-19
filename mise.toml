@@ -1,0 +1,31 @@
+[tools]
+bun = "1.4.2"
+node = "24.21.0"
+
+[tasks.setup]
+description = "Install dependencies from the frozen lockfile"
+run = "bun ci"
+
+[tasks.dev]
+description = "Start the Vite development server"
+run = "bun run dev"
+
+[tasks.check]
+description = "Run the complete validation suite"
+run = "bun run check"
+
+[tasks.test]
+description = "Run tests once"
+run = "bun run test"
+
+[tasks.test-watch]
+description = "Run tests in watch mode"
+run = "bun run test:watch"
+
+[tasks.format]
+description = "Format project files"
+run = "bun run format"
+
+[tasks.build]
+description = "Type-check and create the production build"
+run = "bun run build"

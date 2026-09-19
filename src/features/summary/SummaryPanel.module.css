@@ -1,0 +1,47 @@
+.panel,
+.heading {
+  display: grid;
+  gap: 1rem;
+}
+.heading {
+  gap: 0.25rem;
+}
+.heading h2,
+.heading p,
+.metrics {
+  margin: 0;
+}
+.metrics {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+.metrics > div {
+  background: var(--color-surface-muted, #f1f5f9);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+.metrics dt {
+  color: var(--color-muted, #475569);
+  font-size: 0.875rem;
+}
+.metrics dd {
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  margin: 0.35rem 0 0;
+}
+.metrics .detail {
+  color: var(--color-muted, #475569);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+.positive {
+  border-inline-start: 0.25rem solid var(--color-positive, #15803d);
+}
+.warning {
+  border-inline-start: 0.25rem solid var(--color-warning, #b45309);
+}
+.default {
+  border-inline-start: 0.25rem solid transparent;
+}

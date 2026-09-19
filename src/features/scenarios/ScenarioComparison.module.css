@@ -1,0 +1,63 @@
+.panel,
+.panel header {
+  display: grid;
+  gap: 1rem;
+}
+.panel h2,
+.panel h3,
+.panel p,
+.panel dl {
+  margin: 0;
+}
+.cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+.card {
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: 0.75rem;
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+.card dl {
+  display: grid;
+  gap: 0.75rem;
+}
+.card dl > div {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+.card dt {
+  color: var(--color-muted, #475569);
+}
+.card dd {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  margin: 0;
+  text-align: end;
+}
+.card button,
+.actions button {
+  border: 1px solid var(--color-accent, #3157a4);
+  border-radius: 0.375rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0.6rem 0.8rem;
+}
+.card button[aria-pressed='true'] {
+  background: var(--color-accent, #3157a4);
+  color: var(--color-on-accent, white);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.panel button:focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}

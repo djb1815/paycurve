@@ -1,0 +1,89 @@
+:root {
+  color-scheme: light dark;
+  --colour-page: #f4f6f3;
+  --colour-surface: #ffffff;
+  --colour-surface-subtle: #e9eee8;
+  --colour-text: #142019;
+  --colour-text-muted: #536159;
+  --colour-border: #c8d1ca;
+  --colour-accent: #075e54;
+  --colour-accent-contrast: #ffffff;
+  --colour-positive: #17633a;
+  --colour-warning: #8a4b08;
+  --colour-danger: #a32929;
+  --focus-ring: #1479c9;
+  --shadow-panel: 0 14px 36px rgb(28 48 37 / 8%);
+  --radius-small: 0.4rem;
+  --radius-medium: 0.8rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --colour-page: #111713;
+  --colour-surface: #18211b;
+  --colour-surface-subtle: #223027;
+  --colour-text: #edf5ef;
+  --colour-text-muted: #b2c1b7;
+  --colour-border: #3b4d41;
+  --colour-accent: #75d7c3;
+  --colour-accent-contrast: #10231e;
+  --colour-positive: #86dfa8;
+  --colour-warning: #ffc16d;
+  --colour-danger: #ff9898;
+  --focus-ring: #83c7ff;
+  --shadow-panel: 0 14px 36px rgb(0 0 0 / 24%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --colour-page: #111713;
+    --colour-surface: #18211b;
+    --colour-surface-subtle: #223027;
+    --colour-text: #edf5ef;
+    --colour-text-muted: #b2c1b7;
+    --colour-border: #3b4d41;
+    --colour-accent: #75d7c3;
+    --colour-accent-contrast: #10231e;
+    --colour-positive: #86dfa8;
+    --colour-warning: #ffc16d;
+    --colour-danger: #ff9898;
+    --focus-ring: #83c7ff;
+    --shadow-panel: 0 14px 36px rgb(0 0 0 / 24%);
+  }
+}
+
+@media print {
+  :root,
+  :root[data-theme] {
+    color-scheme: light;
+    --colour-page: #ffffff;
+    --colour-surface: #ffffff;
+    --colour-surface-subtle: #f2f2f2;
+    --colour-text: #000000;
+    --colour-text-muted: #333333;
+    --colour-border: #777777;
+    --shadow-panel: none;
+  }
+}

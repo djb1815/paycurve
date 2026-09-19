@@ -1,0 +1,82 @@
+.app {
+  width: min(90rem, 100%);
+  margin: 0 auto;
+  padding: var(--space-8) clamp(var(--space-4), 4vw, var(--space-12));
+}
+
+.masthead {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.kicker {
+  margin: 0;
+  color: var(--colour-accent);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.masthead h1 {
+  max-width: 18ch;
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.lede {
+  max-width: 66ch;
+  margin: 0;
+  color: var(--colour-text-muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-left: 0.25rem solid var(--colour-warning);
+  background: var(--colour-surface-subtle);
+}
+
+.layout,
+.results {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.layout {
+  grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.4fr);
+  align-items: start;
+}
+
+.results {
+  min-width: 0;
+}
+
+.footer {
+  margin-top: var(--space-12);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--colour-border);
+  color: var(--colour-text-muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 56rem) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .app {
+    width: 100%;
+    padding: 0;
+  }
+
+  .masthead h1 {
+    font-size: 2rem;
+  }
+}

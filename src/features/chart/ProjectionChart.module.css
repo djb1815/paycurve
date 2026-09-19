@@ -1,0 +1,49 @@
+.panel,
+.panel header,
+.selector {
+  display: grid;
+  gap: 0.75rem;
+}
+.panel h2,
+.panel p {
+  margin: 0;
+}
+.eyebrow {
+  color: var(--color-accent, #3157a4);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.selector {
+  font-weight: 700;
+}
+.selector input {
+  inline-size: 100%;
+}
+.tableWrap {
+  overflow-x: auto;
+}
+.tableWrap:focus-visible {
+  outline: 3px solid var(--color-focus, #2563eb);
+  outline-offset: 2px;
+}
+.tableWrap table {
+  border-collapse: collapse;
+  min-width: 42rem;
+  width: 100%;
+}
+.tableWrap caption {
+  text-align: start;
+  margin-block-end: 0.5rem;
+}
+.tableWrap th,
+.tableWrap td {
+  border-block-end: 1px solid var(--color-border, #cbd5e1);
+  padding: 0.75rem;
+  text-align: start;
+}
+.tableWrap tbody tr[aria-current='true'] {
+  background: var(--color-surface-muted, #eff6ff);
+  font-weight: 700;
+}
