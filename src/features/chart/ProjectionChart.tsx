@@ -62,10 +62,7 @@ function MetricPlot({ points, valueFor, label, tone }: MetricPlotProps) {
   const availableHeight = plotHeight - plotInset * 2;
   const sacrifices = points.map((point) => point.values!.sacrificePence);
   const minimumSacrifice = Math.min(...sacrifices);
-  const sacrificeSpan = Math.max(
-    Math.max(...sacrifices) - minimumSacrifice,
-    1,
-  );
+  const sacrificeSpan = Math.max(Math.max(...sacrifices) - minimumSacrifice, 1);
   const xFor = (point: ChartPoint) =>
     plotInset +
     ((point.values!.sacrificePence - minimumSacrifice) / sacrificeSpan) *
