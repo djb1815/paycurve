@@ -7,10 +7,8 @@ import { ReportPanel } from '../features/report';
 import { ScenarioComparison } from '../features/scenarios';
 import { SettingsPanel } from '../features/settings';
 import { SummaryPanel } from '../features/summary';
-import { CalculationTraces } from '../features/traces';
 import {
   selectResultsAreStale,
-  selectScenarioViewModel,
   usePlanner,
 } from '../state';
 
@@ -50,6 +48,9 @@ function newEquityEventId(existingIds: readonly string[]): string {
 export function PlannerApplication() {
   const { actions, state } = usePlanner();
   const [rawValues, setRawValues] = useState<RawValues>({});
+  const [activeView, setActiveView] = useState<'summary' | 'plan' | 'report'>(
+    () => (state.plan.facts.baseSalary > 0 ? 'summary' : 'plan'),
+  );
   const selectedScenario = state.selectedScenarioId;
   const editableScenario: EditableScenario =
     selectedScenario === 'alternative' ? 'alternative' : 'current';
@@ -60,10 +61,6 @@ export function PlannerApplication() {
   );
   const points = useMemo(() => curvePoints(state), [state]);
   const selectedIndex = selectedCurveIndex(state);
-  const selectedProjection = selectScenarioViewModel(
-    state,
-    selectedScenario,
-  ).projection;
   const settingsImportError = importError(state);
 
   function updateFacts(update: (facts: PlanFacts) => PlanFacts) {
@@ -95,6 +92,9 @@ export function PlannerApplication() {
     switch (id) {
       case 'base-salary':
         updateFacts((facts) => ({ ...facts, baseSalary: invalid }));
+        if (state.plan.maxAdditionalRegularSalarySacrifice === 0 && invalid > 0) {
+          actions.updatePlanField('maxAdditionalRegularSalarySacrifice', Math.round(invalid / 2));
+        }
         return;
       case 'bonus-override':
         updateFacts((facts) => ({
@@ -189,6 +189,20 @@ export function PlannerApplication() {
   function updateValue(id: string, value: string) {
     setRaw(id, value);
     const equity = equityFieldDetails(id);
+    if (id === 'regular-salary-sacrifice-rate') {
+      const percentage = Number(value);
+      if (Number.isFinite(percentage)) {
+        updateAllocation('regularSalarySacrifice', Math.round(state.plan.facts.baseSalary * percentage / 100));
+      }
+      return;
+    }
+    if (id === 'max-additional-regular-salary-sacrifice-rate') {
+      const percentage = Number(value);
+      if (Number.isFinite(percentage)) {
+        actions.updatePlanField('maxAdditionalRegularSalarySacrifice', Math.round(state.plan.facts.baseSalary * percentage / 100));
+      }
+      return;
+    }
     if (id === 'equity-add-event' && value === 'true') {
       updateFacts((facts) => ({
         ...facts,
@@ -368,13 +382,26 @@ export function PlannerApplication() {
   return (
     <main className={styles.app}>
       <header className={styles.masthead}>
-        <p className={styles.kicker}>UK adjusted net income planner</p>
-        <h1>See the shape of your salary-sacrifice decision.</h1>
-        <p className={styles.lede}>
-          Compare adjusted net income, pension funding, and cash outcomes for
-          the {state.plan.taxYear} tax year. Financial inputs stay in this
-          browser and are never sent to a service.
-        </p>
+        <div className={styles.headerRow}>
+          <div>
+            <p className={styles.kicker}>UK adjusted net income planner</p>
+            <h1>See the shape of your salary-sacrifice decision.</h1>
+          </div>
+          <fieldset className={styles.themeMenu}>
+            <legend>Theme</legend>
+            {(['system', 'light', 'dark'] as const).map((theme) => (
+              <label key={theme} title={`${theme} theme`}>
+                <input checked={state.theme === theme} name="header-theme" onChange={() => actions.setTheme(theme)} type="radio" value={theme} />
+                <span aria-hidden="true">{theme === 'system' ? '◐' : theme === 'light' ? '☀' : '◑'}</span>
+                <span className={styles.visuallyHidden}>{theme}</span>
+              </label>
+            ))}
+          </fieldset>
+        </div>
+        <p className={styles.lede}>Compare adjusted net income, pension funding, and cash outcomes for the {state.plan.taxYear} tax year. Financial inputs stay in this browser and are never sent to a service.</p>
+        <nav aria-label="Planner sections" className={styles.tabs} data-print-hidden="true">
+          {([['summary', 'Summary'], ['plan', 'Plan inputs'], ['report', 'Print report']] as const).map(([view, label]) => <button aria-current={activeView === view ? 'page' : undefined} className={activeView === view ? styles.activeTab : undefined} key={view} onClick={() => setActiveView(view)} type="button">{label}</button>)}
+        </nav>
         <p className={styles.notice} role="status">
           {stale
             ? 'Correct the highlighted inputs. The last valid calculation remains visible while this draft is invalid.'
@@ -382,8 +409,7 @@ export function PlannerApplication() {
         </p>
       </header>
 
-      <div className={styles.layout}>
-        <div>
+      {activeView === 'plan' ? <div className={styles.singleView}>
           <InputsPanel
             fields={[]}
             form={form}
@@ -404,9 +430,8 @@ export function PlannerApplication() {
             taxYearLabel={state.plan.taxYear}
             theme={state.theme}
           />
-        </div>
-
-        <div className={styles.results}>
+      </div> : null}
+      {activeView === 'summary' ? <div className={styles.results}>
           <SummaryPanel
             outcome={summaryOutcome(state, selectedScenario)}
             statusMessage={
@@ -453,15 +478,8 @@ export function PlannerApplication() {
                   : 'ready'
             }
           />
-          <CalculationTraces traces={tracesFor(selectedProjection)} />
-          <ReportPanel
-            generatedLabel="from your current local plan"
-            onPrint={() => window.print()}
-            report={planningReport(state)}
-            sections={[]}
-          />
-        </div>
-      </div>
+      </div> : null}
+      {activeView === 'report' ? <div className={styles.singleView}><ReportPanel generatedLabel="from your current local plan" onPrint={() => window.print()} report={planningReport(state)} sections={[]} /></div> : null}
 
       <footer className={styles.footer}>
         Planning estimates are not tax advice. Check salary-sacrifice and

@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import { SummaryPanel, type SummaryOutcome } from './SummaryPanel';
@@ -48,7 +49,7 @@ describe('SummaryPanel', () => {
     expect(screen.getByText('£50')).toBeInTheDocument();
   });
 
-  it('keeps supplied issue order, severity words, and unknown-code fallback presentation', () => {
+  it('keeps supplied issue order, severity words, and unknown-code fallback presentation', async () => {
     render(
       <SummaryPanel
         outcome={{
@@ -65,10 +66,10 @@ describe('SummaryPanel', () => {
       />,
     );
 
-    const issues = within(
-      screen.getByRole('region', { name: /plan notices/i }),
-    ).getAllByRole('listitem');
-    expect(issues.map((issue) => issue.textContent)).toEqual([
+    const issueSection = screen.getByRole('region', { name: /plan notices/i });
+    await userEvent.click(within(issueSection).getByText('Plan notices'));
+    const issueItems = within(issueSection).getAllByRole('listitem');
+    expect(issueItems.map((issue) => issue.textContent)).toEqual([
       expect.stringContaining('Warning:'),
       expect.stringContaining('Error:'),
     ]);

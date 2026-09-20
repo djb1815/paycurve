@@ -82,6 +82,34 @@
   border-inline-start: 0.25rem solid currentColor;
   padding-inline-start: 0.75rem;
 }
+.disclosure {
+  display: grid;
+  gap: 0.5rem;
+}
+.disclosure summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  font-weight: 700;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+.disclosure summary:focus-visible {
+  outline: 0.2rem solid var(--colour-focus);
+  outline-offset: 0.2rem;
+}
+.disclosureHint {
+  color: var(--colour-text-muted);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+.disclosure[open] .disclosureHint {
+  font-size: 0;
+}
+.disclosure[open] .disclosureHint::after {
+  content: 'Hide';
+  font-size: 0.875rem;
+}
 .severity {
   font-weight: 700;
 }

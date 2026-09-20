@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -58,13 +58,11 @@ describe('release verification', () => {
       screen.getAllByText(/forecast amounts affect headroom/i),
     ).not.toHaveLength(0);
     expect(screen.getAllByText(/annual disposable cash/i)).not.toHaveLength(0);
-    expect(screen.getAllByText(/sipp contribution paid/i)).not.toHaveLength(0);
-    expect(screen.getAllByText(/gift aid donation/i)).not.toHaveLength(0);
 
-    const alternative = screen.getByRole('combobox', {
-      name: /alternative sacrifice point/i,
-    });
-    await user.selectOptions(alternative, '1');
+    fireEvent.change(
+      screen.getByRole('slider', { name: /alternative regular sacrifice/i }),
+      { target: { value: '1' } },
+    );
 
     expect(screen.getByRole('radio', { name: /alternative/i })).toBeChecked();
     expect(
@@ -73,7 +71,7 @@ describe('release verification', () => {
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: /selected alternative/i }),
+      screen.getByText(/alternative:/i),
     ).toBeInTheDocument();
   });
 
@@ -178,6 +176,7 @@ describe('release verification', () => {
     await user.keyboard('{ArrowRight}');
     expect(screen.getByRole('radio', { name: /optimal/i })).toBeChecked();
 
+    await user.click(screen.getByRole('button', { name: 'Plan inputs' }));
     const payrollDisclosure = screen.getByRole('checkbox', {
       name: 'Add PAYE details',
     });
@@ -185,18 +184,18 @@ describe('release verification', () => {
     await user.keyboard(' ');
     expect(screen.getByLabelText('PAYE tax code')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('radio', { name: 'Dark' }));
+    await user.click(screen.getAllByRole('radio', { name: 'dark' })[0]!);
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
-    await user.click(screen.getByRole('radio', { name: 'Light' }));
+    await user.click(screen.getAllByRole('radio', { name: 'light' })[0]!);
     expect(document.documentElement).toHaveAttribute('data-theme', 'light');
-    await user.click(screen.getByRole('radio', { name: 'System' }));
+    await user.click(screen.getAllByRole('radio', { name: 'system' })[0]!);
     expect(document.documentElement).not.toHaveAttribute('data-theme');
 
+    await user.click(screen.getByRole('button', { name: 'Summary' }));
     expect(screen.getAllByText(/^Information:/)).not.toHaveLength(0);
-    expect(
-      screen.getByRole('heading', { name: /sacrifice trade-off table/i }),
-    ).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /print report/i }));
+    await user.click(screen.getByRole('button', { name: 'Print report' }));
+    expect(screen.getByRole('heading', { name: /sacrifice trade-off table/i })).toBeInTheDocument();
+    await user.click(screen.getAllByRole('button', { name: 'Print report' })[1]!);
     expect(print).toHaveBeenCalledOnce();
     print.mockRestore();
   });
@@ -222,6 +221,7 @@ describe('release verification', () => {
       new Date('2026-09-20T12:00:00.000Z'),
     );
     render(<App initialPlan={original} storage={storage} />);
+    await user.click(screen.getByRole('button', { name: 'Plan inputs' }));
 
     await user.clear(screen.getByRole('textbox', { name: 'Base salary' }));
     await user.type(

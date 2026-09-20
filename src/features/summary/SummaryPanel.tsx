@@ -298,23 +298,30 @@ export function SummaryPanel({
           aria-labelledby="plan-issues-heading"
           className={styles.messages}
         >
-          <h3 id="plan-issues-heading">Plan notices</h3>
-          <ul>
-            {outcome.issues.map((issue, index) => {
-              const copy = messageCopy(issue, issueCopy);
-              return (
-                <li
-                  className={styles[`message${issue.severity}`]}
-                  key={`${issue.code}-${index}`}
-                >
-                  <span className={styles.severity}>
-                    {severityLabel(issue.severity)}:
-                  </span>{' '}
-                  <strong>{copy.title}</strong> {copy.description}
-                </li>
-              );
-            })}
-          </ul>
+          <details className={styles.disclosure}>
+            <summary>
+              <span id="plan-issues-heading" role="heading" aria-level={3}>
+                Plan notices
+              </span>
+              <span className={styles.disclosureHint}>Show notices</span>
+            </summary>
+            <ul>
+              {outcome.issues.map((issue, index) => {
+                const copy = messageCopy(issue, issueCopy);
+                return (
+                  <li
+                    className={styles[`message${issue.severity}`]}
+                    key={`${issue.code}-${index}`}
+                  >
+                    <span className={styles.severity}>
+                      {severityLabel(issue.severity)}:
+                    </span>{' '}
+                    <strong>{copy.title}</strong> {copy.description}
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
         </section>
       ) : null}
       {outcome?.insights?.length ? (
@@ -322,23 +329,30 @@ export function SummaryPanel({
           aria-labelledby="plan-insights-heading"
           className={styles.messages}
         >
-          <h3 id="plan-insights-heading">Planning insights</h3>
-          <ul>
-            {outcome.insights.map((insight, index) => {
-              const copy = messageCopy(insight, insightCopy);
-              return (
-                <li
-                  className={styles[`message${insight.severity}`]}
-                  key={`${insight.code}-${index}`}
-                >
-                  <span className={styles.severity}>
-                    {severityLabel(insight.severity)}:
-                  </span>{' '}
-                  <strong>{copy.title}</strong> {copy.description}
-                </li>
-              );
-            })}
-          </ul>
+          <details className={styles.disclosure}>
+            <summary>
+              <span id="plan-insights-heading" role="heading" aria-level={3}>
+                Planning insights
+              </span>
+              <span className={styles.disclosureHint}>Show insights</span>
+            </summary>
+            <ul>
+              {outcome.insights.map((insight, index) => {
+                const copy = messageCopy(insight, insightCopy);
+                return (
+                  <li
+                    className={styles[`message${insight.severity}`]}
+                    key={`${insight.code}-${index}`}
+                  >
+                    <span className={styles.severity}>
+                      {severityLabel(insight.severity)}:
+                    </span>{' '}
+                    <strong>{copy.title}</strong> {copy.description}
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
         </section>
       ) : null}
     </section>

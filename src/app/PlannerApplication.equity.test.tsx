@@ -40,6 +40,7 @@ describe('PlannerApplication equity income inputs', () => {
         <PlannerApplication />
       </PlannerProvider>,
     );
+    await user.click(screen.getByRole('button', { name: 'Plan inputs' }));
 
     expect(
       screen.getByRole('textbox', { name: 'RSU and share income 1' }),

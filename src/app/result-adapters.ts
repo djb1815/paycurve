@@ -177,6 +177,10 @@ export function curvePoints(state: PlannerStoreState): readonly ChartPoint[] {
       ...(markers.length > 0 ? { marker: markers.join(' · ') } : {}),
       values: {
         sacrificePence: point.additionalRegularSalarySacrifice,
+        grossEmploymentPayPence:
+          state.plan.facts.baseSalary -
+          state.plan.current.regularSalarySacrifice -
+          point.additionalRegularSalarySacrifice,
         adjustedNetIncomePence: projection.totals.adjustedNetIncome,
         annualNetEmploymentPayPence: projection.totals.annualNetEmploymentPay,
         annualDisposableCashPence: projection.totals.annualDisposableCash,

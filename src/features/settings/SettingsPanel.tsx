@@ -25,10 +25,7 @@ export interface SettingsPanelProps {
   readonly helpTopics?: readonly HelpTopic[];
 }
 
-const themes: readonly {
-  readonly value: ThemePreference;
-  readonly label: string;
-}[] = [
+const themes: readonly { readonly value: ThemePreference; readonly label: string }[] = [
   { value: 'system', label: 'System' },
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
@@ -68,22 +65,9 @@ export function SettingsPanel({
           <dd>{storageStatus}</dd>
         </div>
       </dl>
-      <fieldset>
+      <fieldset className={styles.themes}>
         <legend>Colour theme</legend>
-        <div className={styles.themes}>
-          {themes.map((option) => (
-            <label key={option.value}>
-              <input
-                checked={theme === option.value}
-                name="theme"
-                onChange={() => onThemeChange?.(option.value)}
-                type="radio"
-                value={option.value}
-              />
-              {option.label}
-            </label>
-          ))}
-        </div>
+        {themes.map((option) => <label key={option.value}><input checked={theme === option.value} name="theme" onChange={() => onThemeChange?.(option.value)} type="radio" value={option.value} />{option.label}</label>)}
       </fieldset>
       <div className={styles.actions}>
         <button onClick={onExport} type="button">

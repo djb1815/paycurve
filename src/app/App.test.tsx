@@ -21,24 +21,23 @@ function plan(overrides: Partial<PlannerState> = {}): PlannerState {
 }
 
 describe('App integration', () => {
-  it('renders every live feature region without a fixture-only production path', () => {
+  it('renders the live features in their focused views', async () => {
+    const user = userEvent.setup();
     render(<App initialPlan={plan()} />);
 
-    expect(
-      screen.getByRole('heading', { name: /income and adjustments/i }),
-    ).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: /salary sacrifice trade-off/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: /compare scenarios/i }),
     ).toBeInTheDocument();
-    expect(
-      screen.getAllByRole('heading', { name: /calculation traces/i }),
-    ).toHaveLength(2);
+    await user.click(screen.getByRole('button', { name: 'Plan inputs' }));
+    expect(screen.getByRole('heading', { name: /income and adjustments/i })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Print report' }));
     expect(
       screen.getByRole('heading', { name: /scenario report/i }),
     ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Summary' }));
     expect(screen.getAllByText('£120,000')).not.toHaveLength(0);
     expect(screen.getAllByText(/add optional paye details/i)).not.toHaveLength(
       0,
@@ -49,9 +48,13 @@ describe('App integration', () => {
     const user = userEvent.setup();
     render(<App initialPlan={plan()} />);
 
+    await user.click(screen.getByRole('button', { name: 'Plan inputs' }));
+
     await user.clear(
       screen.getByRole('textbox', { name: 'Target adjusted net income' }),
     );
+
+    await user.click(screen.getByRole('button', { name: 'Summary' }));
 
     expect(
       screen.getByText(/last valid calculation remains visible/i),
@@ -91,9 +94,10 @@ describe('App integration', () => {
     const user = userEvent.setup();
     render(<App initialPlan={plan()} />);
 
-    await user.click(screen.getByRole('radio', { name: 'Dark' }));
+    await user.click(screen.getByRole('radio', { name: 'dark' }));
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
 
+    await user.click(screen.getByRole('button', { name: 'Plan inputs' }));
     const file = new File(['{not json'], 'invalid-plan.json', {
       type: 'application/json',
     });
@@ -105,6 +109,7 @@ describe('App integration', () => {
         /this export cannot be imported/i,
       );
     });
+    await user.click(screen.getByRole('button', { name: 'Summary' }));
     expect(screen.getAllByText('£120,000')).not.toHaveLength(0);
   });
 
@@ -141,7 +146,8 @@ describe('App integration', () => {
     expect(screen.getAllByText('Optimal limit')).not.toHaveLength(0);
   });
 
-  it('includes all supplied financial and payroll inputs in the printable report', () => {
+  it('includes all supplied financial and payroll inputs in the printable report', async () => {
+    const user = userEvent.setup();
     render(
       <App
         initialPlan={plan({
@@ -181,6 +187,7 @@ describe('App integration', () => {
       />,
     );
 
+    await user.click(screen.getByRole('button', { name: 'Print report' }));
     const report = screen
       .getByRole('heading', { name: 'Scenario report' })
       .closest('section');
@@ -214,12 +221,15 @@ describe('App integration', () => {
     await user.keyboard('{ArrowRight}');
     expect(screen.getByRole('radio', { name: /Optimal/i })).toBeChecked();
 
-    await user.click(screen.getByRole('radio', { name: 'Light' }));
+    await user.click(screen.getByRole('radio', { name: 'light' }));
     expect(document.documentElement).toHaveAttribute('data-theme', 'light');
-    await user.click(screen.getByRole('radio', { name: 'System' }));
+    await user.click(screen.getByRole('radio', { name: 'system' }));
     expect(document.documentElement).not.toHaveAttribute('data-theme');
 
     await user.click(screen.getByRole('button', { name: 'Print report' }));
+    await user.click(
+      screen.getAllByRole('button', { name: 'Print report' })[1]!,
+    );
     expect(print).toHaveBeenCalledOnce();
     print.mockRestore();
   });

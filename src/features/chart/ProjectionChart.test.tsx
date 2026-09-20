@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -6,7 +6,7 @@ import { chartFixture, chartMarkersFixture } from './fixture';
 import { ProjectionChart } from './ProjectionChart';
 
 describe('ProjectionChart', () => {
-  it('lists all supplied marker types and keeps exact values in a table', () => {
+  it('lists all supplied marker types and keeps exact values in a collapsible table', async () => {
     render(
       <ProjectionChart
         markers={chartMarkersFixture}
@@ -15,6 +15,7 @@ describe('ProjectionChart', () => {
       />,
     );
 
+    await userEvent.click(screen.getByText('Exact projection samples'));
     expect(
       screen.getByRole('complementary', { name: /curve markers/i }),
     ).toHaveTextContent(
@@ -24,12 +25,11 @@ describe('ProjectionChart', () => {
       screen.getByRole('columnheader', { name: /net employment pay/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/not plotted on a shared axis/i),
+      screen.getByText(/annual outcomes share one £ axis/i),
     ).toBeInTheDocument();
   });
 
   it('selects an Alternative using a native keyboard-accessible form control', async () => {
-    const user = userEvent.setup();
     const onSelectedIndexChange = vi.fn();
     render(
       <ProjectionChart
@@ -39,14 +39,14 @@ describe('ProjectionChart', () => {
       />,
     );
 
-    await user.selectOptions(
-      screen.getByRole('combobox', { name: /alternative sacrifice point/i }),
-      '2',
-    );
+    const slider = screen.getByRole('slider', {
+      name: /alternative regular sacrifice/i,
+    });
+    fireEvent.change(slider, { target: { value: '2' } });
 
     expect(onSelectedIndexChange).toHaveBeenCalledWith(2);
     expect(
-      screen.getByRole('heading', { name: /selected alternative: £0/i }),
+      screen.getByText(/alternative: £0/i),
     ).toBeInTheDocument();
   });
 
