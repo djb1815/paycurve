@@ -26,13 +26,15 @@ describe('App integration', () => {
     render(<App initialPlan={plan()} />);
 
     expect(
-      screen.getByRole('heading', { name: /salary sacrifice trade-off/i }),
+      screen.getByRole('heading', { name: /where employment pay goes/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: /compare scenarios/i }),
     ).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Plan inputs' }));
-    expect(screen.getByRole('heading', { name: /income and adjustments/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /income and adjustments/i }),
+    ).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Print report' }));
     expect(
       screen.getByRole('heading', { name: /scenario report/i }),

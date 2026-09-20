@@ -244,7 +244,14 @@ export function inputForm(
             {
               control: 'percentage',
               unit: 'percent (%)',
-              value: rawValues['regular-salary-sacrifice-rate'] ?? (facts.baseSalary === 0 ? '0' : String((allocation.regularSalarySacrifice / facts.baseSalary) * 100)),
+              value:
+                rawValues['regular-salary-sacrifice-rate'] ??
+                (facts.baseSalary === 0
+                  ? '0'
+                  : String(
+                      (allocation.regularSalarySacrifice / facts.baseSalary) *
+                        100,
+                    )),
             },
           ),
           moneyField(
@@ -263,7 +270,15 @@ export function inputForm(
             {
               control: 'percentage',
               unit: 'percent (%)',
-              value: rawValues['max-additional-regular-salary-sacrifice-rate'] ?? (facts.baseSalary === 0 ? '50' : String((state.plan.maxAdditionalRegularSalarySacrifice / facts.baseSalary) * 100)),
+              value:
+                rawValues['max-additional-regular-salary-sacrifice-rate'] ??
+                (facts.baseSalary === 0
+                  ? '50'
+                  : String(
+                      (state.plan.maxAdditionalRegularSalarySacrifice /
+                        facts.baseSalary) *
+                        100,
+                    )),
             },
           ),
           moneyField(

@@ -14,6 +14,9 @@ export const chartFixture: readonly ChartPoint[] = [
       annualNetEmploymentPayPence: 7_620_000,
       annualDisposableCashPence: 7_210_000,
       pensionInputPence: 600_000,
+      incomeTaxPence: 1_700_000,
+      employeeNationalInsurancePence: 900_000,
+      salarySacrificePence: 600_000,
     },
   },
   {
@@ -29,6 +32,9 @@ export const chartFixture: readonly ChartPoint[] = [
       annualNetEmploymentPayPence: 7_170_000,
       annualDisposableCashPence: 6_760_000,
       pensionInputPence: 1_450_000,
+      incomeTaxPence: 1_450_000,
+      employeeNationalInsurancePence: 850_000,
+      salarySacrificePence: 1_450_000,
     },
   },
   {
@@ -44,6 +50,9 @@ export const chartFixture: readonly ChartPoint[] = [
       annualNetEmploymentPayPence: 6_980_000,
       annualDisposableCashPence: 6_570_000,
       pensionInputPence: 1_800_000,
+      incomeTaxPence: 1_300_000,
+      employeeNationalInsurancePence: 800_000,
+      salarySacrificePence: 1_800_000,
     },
   },
 ];

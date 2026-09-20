@@ -25,16 +25,56 @@
   padding: var(--space-1);
 }
 
-.themeMenu legend { display: none; }
-.themeMenu label { cursor: pointer; position: relative; }
-.themeMenu input { inset: 0; opacity: 0; position: absolute; }
-.themeMenu span[aria-hidden='true'] { border-radius: 999px; display: block; font-size: 1.1rem; line-height: 1; padding: var(--space-2); }
-.themeMenu input:checked + span { background: var(--colour-accent); color: var(--colour-accent-contrast); }
-.visuallyHidden { clip: rect(0 0 0 0); clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
+.themeMenu legend {
+  display: none;
+}
+.themeMenu label {
+  cursor: pointer;
+  position: relative;
+}
+.themeMenu input {
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+}
+.themeMenu span[aria-hidden='true'] {
+  border-radius: 999px;
+  display: block;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: var(--space-2);
+}
+.themeMenu input:checked + span {
+  background: var(--colour-accent);
+  color: var(--colour-accent-contrast);
+}
+.visuallyHidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
 
-.tabs { border-bottom: 1px solid var(--colour-border); display: flex; gap: var(--space-2); }
-.tabs button { background: transparent; border: 0; border-bottom: .22rem solid transparent; cursor: pointer; font-weight: 700; padding: var(--space-3) var(--space-4); }
-.tabs button.activeTab { border-color: var(--colour-accent); color: var(--colour-accent); }
+.tabs {
+  border-bottom: 1px solid var(--colour-border);
+  display: flex;
+  gap: var(--space-2);
+}
+.tabs button {
+  background: transparent;
+  border: 0;
+  border-bottom: 0.22rem solid transparent;
+  cursor: pointer;
+  font-weight: 700;
+  padding: var(--space-3) var(--space-4);
+}
+.tabs button.activeTab {
+  border-color: var(--colour-accent);
+  color: var(--colour-accent);
+}
 
 .kicker {
   margin: 0;
@@ -73,7 +113,10 @@
   gap: var(--space-6);
 }
 
-.singleView { margin-inline: auto; max-width: 74rem; }
+.singleView {
+  margin-inline: auto;
+  max-width: 74rem;
+}
 
 .layout {
   grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.4fr);

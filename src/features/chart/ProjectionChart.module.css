@@ -1,15 +1,143 @@
-.panel { display: grid; gap: var(--space-4); }
-.panel h2, .panel p, .figure { margin: 0; }
-.eyebrow { color: var(--colour-accent); font-size: .75rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
-.figure { border: 1px solid var(--colour-border); border-radius: var(--radius-medium); padding: var(--space-3); }
-.figure svg { display: block; inline-size: 100%; min-block-size: 17rem; }
-.grid { stroke: var(--colour-border); stroke-width: 1; }.axis { stroke: var(--colour-text); stroke-width: 1.5; }.axisText, .axisLabel { fill: var(--colour-text-muted); font-size: 13px; }.axisLabel { font-weight: 700; }
-.linegross, .lineani, .lineemployment, .linecash, .linepension { fill: none; stroke-width: 3; }.linegross { stroke: var(--chart-gross); stroke-dasharray: 8 4; }.lineani { stroke: var(--chart-ani); }.lineemployment { stroke: var(--chart-employment); stroke-dasharray: 10 3; }.linecash { stroke: var(--chart-cash); stroke-dasharray: 3 3; }.linepension { stroke: var(--chart-pension); }
-.marker { fill: var(--colour-surface); stroke: var(--colour-text); stroke-width: 2; }.markerLabel { fill: var(--colour-text); font-size: 12px; font-weight: 700; }
-.legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin-block-end: var(--space-2); }.legend span::before { background: currentColor; content: ''; display: inline-block; height: .7rem; margin-inline-end: .35rem; width: .7rem; }.legendgross { color: var(--chart-gross); }.legendani { color: var(--chart-ani); }.legendemployment { color: var(--chart-employment); }.legendcash { color: var(--chart-cash); }.legendpension { color: var(--chart-pension); }
-.slider { display: grid; font-weight: 700; gap: var(--space-2); }.slider input { accent-color: var(--colour-accent); inline-size: 100%; }
-.selectedSummary, .status, .error { border-inline-start: .3rem solid var(--colour-accent); background: var(--colour-surface-subtle); padding: var(--space-3); }.error { border-color: var(--colour-danger); }.status { border-color: var(--colour-warning); }
-.markers { color: var(--colour-text-muted); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); font-size: .875rem; }.markers strong { color: var(--colour-text); }
-.tableWrap { overflow-x: auto; }.tableWrap table { border-collapse: collapse; min-inline-size: 54rem; width: 100%; }.tableWrap th, .tableWrap td { border-block-end: 1px solid var(--colour-border); padding: var(--space-3); text-align: start; }.tableWrap tbody tr[aria-current='true'] { background: var(--colour-surface-subtle); }
-.tableDisclosure { display: grid; gap: var(--space-2); }.tableDisclosure summary { align-items: center; cursor: pointer; display: flex; font-weight: 700; justify-content: space-between; }.tableDisclosure summary:focus-visible { outline: .2rem solid var(--colour-focus); outline-offset: .2rem; }.tableDisclosureHint { color: var(--colour-text-muted); font-size: .875rem; font-weight: 400; }.tableDisclosure[open] .tableDisclosureHint { font-size: 0; }.tableDisclosure[open] .tableDisclosureHint::after { content: 'Hide'; font-size: .875rem; }
-@media print { .slider { display: none; } }
+.panel {
+  display: grid;
+  gap: var(--space-4);
+}
+.panel h2,
+.panel p,
+.figure {
+  margin: 0;
+}
+.eyebrow {
+  color: var(--colour-accent);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.figure {
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-medium);
+  padding: var(--space-3);
+}
+.chart {
+  block-size: 25rem;
+  inline-size: 100%;
+}
+.chart :global(.recharts-cartesian-axis-tick-value),
+.chart :global(.recharts-label),
+.chart :global(.recharts-reference-line text) {
+  fill: var(--colour-text) !important;
+  paint-order: stroke;
+  stroke: var(--colour-surface);
+  stroke-linejoin: round;
+  stroke-width: 0.3rem;
+}
+.chart :global(.recharts-legend-item-text) {
+  color: var(--colour-text);
+}
+.tooltip {
+  background: var(--colour-surface);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-small);
+  box-shadow: var(--shadow-raised);
+  max-inline-size: 18rem;
+  padding: var(--space-3);
+}
+.tooltip dl {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+}
+.tooltip div {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+.tooltip dt {
+  color: var(--colour-text-muted);
+}
+.tooltip dd {
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+.slider {
+  display: grid;
+  font-weight: 700;
+  gap: var(--space-2);
+}
+.slider input {
+  accent-color: var(--colour-accent);
+  inline-size: 100%;
+}
+.selectedSummary,
+.status,
+.error {
+  border-inline-start: 0.3rem solid var(--colour-accent);
+  background: var(--colour-surface-subtle);
+  padding: var(--space-3);
+}
+.error {
+  border-color: var(--colour-danger);
+}
+.status {
+  border-color: var(--colour-warning);
+}
+.markers {
+  color: var(--colour-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  font-size: 0.875rem;
+}
+.markers strong {
+  color: var(--colour-text);
+}
+.tableWrap {
+  overflow-x: auto;
+}
+.tableWrap table {
+  border-collapse: collapse;
+  min-inline-size: 54rem;
+  width: 100%;
+}
+.tableWrap th,
+.tableWrap td {
+  border-block-end: 1px solid var(--colour-border);
+  padding: var(--space-3);
+  text-align: start;
+}
+.tableWrap tbody tr[aria-current='true'] {
+  background: var(--colour-surface-subtle);
+}
+.tableDisclosure {
+  display: grid;
+  gap: var(--space-2);
+}
+.tableDisclosure summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  font-weight: 700;
+  justify-content: space-between;
+}
+.tableDisclosure summary:focus-visible {
+  outline: 0.2rem solid var(--colour-focus);
+  outline-offset: 0.2rem;
+}
+.tableDisclosureHint {
+  color: var(--colour-text-muted);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+.tableDisclosure[open] .tableDisclosureHint {
+  font-size: 0;
+}
+.tableDisclosure[open] .tableDisclosureHint::after {
+  content: 'Hide';
+  font-size: 0.875rem;
+}
+@media print {
+  .slider {
+    display: none;
+  }
+}

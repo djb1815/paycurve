@@ -25,11 +25,11 @@ describe('ProjectionChart', () => {
       screen.getByRole('columnheader', { name: /net employment pay/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/annual outcomes share one £ axis/i),
+      screen.getByText(/ANI is shown as a line because it is a tax measure/i),
     ).toBeInTheDocument();
   });
 
-  it('selects an Alternative using a native keyboard-accessible form control', async () => {
+  it('selects an Alternative using a native keyboard-accessible form control', () => {
     const onSelectedIndexChange = vi.fn();
     render(
       <ProjectionChart
@@ -45,9 +45,7 @@ describe('ProjectionChart', () => {
     fireEvent.change(slider, { target: { value: '2' } });
 
     expect(onSelectedIndexChange).toHaveBeenCalledWith(2);
-    expect(
-      screen.getByText(/alternative: £0/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/alternative: £0/i)).toBeInTheDocument();
   });
 
   it('provides useful invalid, unreachable, and empty states', () => {

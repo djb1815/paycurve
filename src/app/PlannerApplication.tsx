@@ -7,10 +7,7 @@ import { ReportPanel } from '../features/report';
 import { ScenarioComparison } from '../features/scenarios';
 import { SettingsPanel } from '../features/settings';
 import { SummaryPanel } from '../features/summary';
-import {
-  selectResultsAreStale,
-  usePlanner,
-} from '../state';
+import { selectResultsAreStale, usePlanner } from '../state';
 
 import { downloadPlanExport } from './export';
 import {
@@ -29,7 +26,6 @@ import {
   scenarioCards,
   storageStatus,
   summaryOutcome,
-  tracesFor,
 } from './result-adapters';
 import styles from './App.module.css';
 
@@ -92,8 +88,14 @@ export function PlannerApplication() {
     switch (id) {
       case 'base-salary':
         updateFacts((facts) => ({ ...facts, baseSalary: invalid }));
-        if (state.plan.maxAdditionalRegularSalarySacrifice === 0 && invalid > 0) {
-          actions.updatePlanField('maxAdditionalRegularSalarySacrifice', Math.round(invalid / 2));
+        if (
+          state.plan.maxAdditionalRegularSalarySacrifice === 0 &&
+          invalid > 0
+        ) {
+          actions.updatePlanField(
+            'maxAdditionalRegularSalarySacrifice',
+            Math.round(invalid / 2),
+          );
         }
         return;
       case 'bonus-override':
@@ -192,14 +194,20 @@ export function PlannerApplication() {
     if (id === 'regular-salary-sacrifice-rate') {
       const percentage = Number(value);
       if (Number.isFinite(percentage)) {
-        updateAllocation('regularSalarySacrifice', Math.round(state.plan.facts.baseSalary * percentage / 100));
+        updateAllocation(
+          'regularSalarySacrifice',
+          Math.round((state.plan.facts.baseSalary * percentage) / 100),
+        );
       }
       return;
     }
     if (id === 'max-additional-regular-salary-sacrifice-rate') {
       const percentage = Number(value);
       if (Number.isFinite(percentage)) {
-        actions.updatePlanField('maxAdditionalRegularSalarySacrifice', Math.round(state.plan.facts.baseSalary * percentage / 100));
+        actions.updatePlanField(
+          'maxAdditionalRegularSalarySacrifice',
+          Math.round((state.plan.facts.baseSalary * percentage) / 100),
+        );
       }
       return;
     }
@@ -391,16 +399,48 @@ export function PlannerApplication() {
             <legend>Theme</legend>
             {(['system', 'light', 'dark'] as const).map((theme) => (
               <label key={theme} title={`${theme} theme`}>
-                <input checked={state.theme === theme} name="header-theme" onChange={() => actions.setTheme(theme)} type="radio" value={theme} />
-                <span aria-hidden="true">{theme === 'system' ? '◐' : theme === 'light' ? '☀' : '◑'}</span>
+                <input
+                  checked={state.theme === theme}
+                  name="header-theme"
+                  onChange={() => actions.setTheme(theme)}
+                  type="radio"
+                  value={theme}
+                />
+                <span aria-hidden="true">
+                  {theme === 'system' ? '◐' : theme === 'light' ? '☀' : '◑'}
+                </span>
                 <span className={styles.visuallyHidden}>{theme}</span>
               </label>
             ))}
           </fieldset>
         </div>
-        <p className={styles.lede}>Compare adjusted net income, pension funding, and cash outcomes for the {state.plan.taxYear} tax year. Financial inputs stay in this browser and are never sent to a service.</p>
-        <nav aria-label="Planner sections" className={styles.tabs} data-print-hidden="true">
-          {([['summary', 'Summary'], ['plan', 'Plan inputs'], ['report', 'Print report']] as const).map(([view, label]) => <button aria-current={activeView === view ? 'page' : undefined} className={activeView === view ? styles.activeTab : undefined} key={view} onClick={() => setActiveView(view)} type="button">{label}</button>)}
+        <p className={styles.lede}>
+          Compare adjusted net income, pension funding, and cash outcomes for
+          the {state.plan.taxYear} tax year. Financial inputs stay in this
+          browser and are never sent to a service.
+        </p>
+        <nav
+          aria-label="Planner sections"
+          className={styles.tabs}
+          data-print-hidden="true"
+        >
+          {(
+            [
+              ['summary', 'Summary'],
+              ['plan', 'Plan inputs'],
+              ['report', 'Print report'],
+            ] as const
+          ).map(([view, label]) => (
+            <button
+              aria-current={activeView === view ? 'page' : undefined}
+              className={activeView === view ? styles.activeTab : undefined}
+              key={view}
+              onClick={() => setActiveView(view)}
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
         </nav>
         <p className={styles.notice} role="status">
           {stale
@@ -409,7 +449,8 @@ export function PlannerApplication() {
         </p>
       </header>
 
-      {activeView === 'plan' ? <div className={styles.singleView}>
+      {activeView === 'plan' ? (
+        <div className={styles.singleView}>
           <InputsPanel
             fields={[]}
             form={form}
@@ -430,8 +471,10 @@ export function PlannerApplication() {
             taxYearLabel={state.plan.taxYear}
             theme={state.theme}
           />
-      </div> : null}
-      {activeView === 'summary' ? <div className={styles.results}>
+        </div>
+      ) : null}
+      {activeView === 'summary' ? (
+        <div className={styles.results}>
           <SummaryPanel
             outcome={summaryOutcome(state, selectedScenario)}
             statusMessage={
@@ -457,6 +500,7 @@ export function PlannerApplication() {
             }}
             points={stale ? [] : points}
             selectedIndex={selectedIndex}
+            targetAniPence={state.plan.targetAni}
             status={
               stale
                 ? 'invalid'
@@ -478,8 +522,18 @@ export function PlannerApplication() {
                   : 'ready'
             }
           />
-      </div> : null}
-      {activeView === 'report' ? <div className={styles.singleView}><ReportPanel generatedLabel="from your current local plan" onPrint={() => window.print()} report={planningReport(state)} sections={[]} /></div> : null}
+        </div>
+      ) : null}
+      {activeView === 'report' ? (
+        <div className={styles.singleView}>
+          <ReportPanel
+            generatedLabel="from your current local plan"
+            onPrint={() => window.print()}
+            report={planningReport(state)}
+            sections={[]}
+          />
+        </div>
+      ) : null}
 
       <footer className={styles.footer}>
         Planning estimates are not tax advice. Check salary-sacrifice and

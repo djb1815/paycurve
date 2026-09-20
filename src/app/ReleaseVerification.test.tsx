@@ -47,8 +47,7 @@ function fileWithText(name: string, text: string): File {
 }
 
 describe('release verification', () => {
-  it('presents a live baseline with forecast headroom, cash adjustments, and an accessible chart alternative', async () => {
-    const user = userEvent.setup();
+  it('presents a live baseline with forecast headroom, cash adjustments, and an accessible chart alternative', () => {
     render(<App initialPlan={releasePlan()} />);
 
     expect(
@@ -70,9 +69,7 @@ describe('release verification', () => {
         name: /exact projection samples across additional regular salary sacrifice/i,
       }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(/alternative:/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/alternative:/i)).toBeInTheDocument();
   });
 
   it('states reached, already-below, and unreachable target outcomes in text', () => {
@@ -194,8 +191,12 @@ describe('release verification', () => {
     await user.click(screen.getByRole('button', { name: 'Summary' }));
     expect(screen.getAllByText(/^Information:/)).not.toHaveLength(0);
     await user.click(screen.getByRole('button', { name: 'Print report' }));
-    expect(screen.getByRole('heading', { name: /sacrifice trade-off table/i })).toBeInTheDocument();
-    await user.click(screen.getAllByRole('button', { name: 'Print report' })[1]!);
+    expect(
+      screen.getByRole('heading', { name: /sacrifice trade-off table/i }),
+    ).toBeInTheDocument();
+    await user.click(
+      screen.getAllByRole('button', { name: 'Print report' })[1]!,
+    );
     expect(print).toHaveBeenCalledOnce();
     print.mockRestore();
   });
