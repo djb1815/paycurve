@@ -199,7 +199,7 @@ describe('projectPaye', () => {
     });
   });
 
-  it('accepts a K code and makes its payroll limitation explicit', () => {
+  it('accepts a K code when its calculated tax is below the deduction cap', () => {
     const result = request({
       taxCode: 'K100',
       taxCodeBasis: 'month1Week1',
@@ -210,11 +210,77 @@ describe('projectPaye', () => {
       kind: 'supported',
       nextPeriod: { incomeTax: 140_499 },
     });
+  });
+
+  it('limits K-code tax to exactly half of current pay when the cap is reached', () => {
+    const result = projectPaye({
+      config,
+      facts: {
+        ...facts({
+          taxCode: 'K1800',
+          taxCodeBasis: 'month1Week1',
+          payFrequency: 'monthly',
+        }),
+        baseSalary: 1_200_000,
+      },
+      allocation,
+    });
+
+    expect(result).toMatchObject({
+      kind: 'supported',
+      nextPeriod: { grossPay: 100_000, incomeTax: 50_000 },
+    });
     if (result.kind === 'supported') {
-      expect(result.assumptions.map((assumption) => assumption.code)).toContain(
-        'kCodeTaxCapNotModelled',
-      );
+      expect(result.assumptions).toContainEqual({
+        code: 'kCodeDeductionCappedAtHalfPay',
+        parameters: { maximumDeduction: 50_000 },
+      });
     }
+  });
+
+  it('limits K-code tax below its uncapped amount when it would exceed half of current pay', () => {
+    const result = projectPaye({
+      config,
+      facts: {
+        ...facts({
+          taxCode: 'K2000',
+          taxCodeBasis: 'month1Week1',
+          payFrequency: 'monthly',
+        }),
+        baseSalary: 1_200_000,
+      },
+      allocation,
+    });
+
+    expect(result).toMatchObject({
+      kind: 'supported',
+      nextPeriod: { grossPay: 100_000, incomeTax: 50_000 },
+    });
+  });
+
+  it('caps a cumulative K-code deduction against the current period pay', () => {
+    const result = projectPaye({
+      config,
+      facts: {
+        ...facts({
+          taxCode: 'K2000',
+          taxCodeBasis: 'cumulative',
+          payFrequency: 'monthly',
+          yearToDate: {
+            completedPeriods: 1,
+            taxablePay: 100_000,
+            incomeTaxPaid: 0,
+          },
+        }),
+        baseSalary: 1_200_000,
+      },
+      allocation,
+    });
+
+    expect(result).toMatchObject({
+      kind: 'supported',
+      nextPeriod: { period: 2, grossPay: 100_000, incomeTax: 50_000 },
+    });
   });
 
   it('includes one-off gross pay and associated bonus sacrifice in the next period', () => {

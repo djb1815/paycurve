@@ -34,6 +34,11 @@ describe('ReportPanel', () => {
     expect(
       screen.getByRole('columnheader', { name: 'Disposable cash' }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('columnheader', {
+        name: 'Additional regular sacrifice',
+      }),
+    ).toBeInTheDocument();
   });
 
   it('uses a print-only control and delegates printing to its host', async () => {

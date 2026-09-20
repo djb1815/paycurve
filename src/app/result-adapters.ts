@@ -6,10 +6,11 @@ import type {
   ScenarioId,
 } from '../domain';
 import type { ChartMarker, ChartPoint } from '../features/chart';
-import type { PlanningReport } from '../features/report';
+import type { PlanningReport, ReportInput } from '../features/report';
 import type { ScenarioCardData } from '../features/scenarios';
 import type { SettingsImportError } from '../features/settings';
 import type { SummaryOutcome } from '../features/summary';
+import { insightCopy, issueCopy, messageCopy } from '../features/summary';
 import type { CalculationTrace } from '../features/traces';
 import type { PayeProjectionResult } from '../payroll';
 import { selectResultsAreStale, selectScenarioViewModel } from '../state';
@@ -24,6 +25,18 @@ function certaintyForFacts(facts: PlanFacts): 'actual' | 'forecast' | 'mixed' {
     facts.savingsInterest.certainty,
     ...facts.equityIncome.map((income) => income.certainty),
   ];
+  return certainties.every((certainty) => certainty === 'actual')
+    ? 'actual'
+    : certainties.every((certainty) => certainty === 'forecast')
+      ? 'forecast'
+      : 'mixed';
+}
+
+function certaintyForEquityIncome(
+  equityIncome: PlanFacts['equityIncome'],
+): 'actual' | 'forecast' | 'mixed' | undefined {
+  if (equityIncome.length === 0) return undefined;
+  const certainties = equityIncome.map((income) => income.certainty);
   return certainties.every((certainty) => certainty === 'actual')
     ? 'actual'
     : certainties.every((certainty) => certainty === 'forecast')
@@ -112,7 +125,9 @@ export function scenarioCards(
       optimal.kind === 'unreachable' ? 'Optimal limit' : 'Optimal',
       optimal.kind === 'unreachable'
         ? 'The maximum permitted regular sacrifice; it does not reach the target.'
-        : 'Minimum regular sacrifice needed to reach the target.',
+        : optimal.kind === 'alreadyAtOrBelow'
+          ? 'Your current allocation already meets the target; no additional regular sacrifice is required.'
+          : 'Minimum regular sacrifice needed to reach the target.',
       optimal.projection,
     ),
     card(
@@ -127,6 +142,13 @@ export function scenarioCards(
 export function curvePoints(state: PlannerStoreState): readonly ChartPoint[] {
   const currentRegular = state.plan.current.regularSalarySacrifice;
   const optimal = state.derived.optimal;
+  const alternativeMatchesCurveAllocation =
+    state.plan.alternative.bonusSalarySacrifice ===
+      state.plan.current.bonusSalarySacrifice &&
+    state.plan.alternative.sippNetContribution ===
+      state.plan.current.sippNetContribution &&
+    state.plan.alternative.giftAidCashDonation ===
+      state.plan.current.giftAidCashDonation;
   const alternativeAdditional =
     state.plan.alternative.regularSalarySacrifice - currentRegular;
   const optimalAdditional =
@@ -139,6 +161,7 @@ export function curvePoints(state: PlannerStoreState): readonly ChartPoint[] {
       optimal.kind !== 'unreachable'
         ? 'Optimal'
         : undefined,
+      alternativeMatchesCurveAllocation &&
       point.additionalRegularSalarySacrifice === alternativeAdditional
         ? 'Alternative'
         : undefined,
@@ -214,7 +237,53 @@ export function payeStatus(paye: PayeProjectionResult): string {
   if (paye.kind === 'insufficientInputs') {
     return 'Add optional PAYE details to see a next-payslip estimate; annual planning results are still available.';
   }
-  return 'PAYE-aware estimate is unavailable because the supplied payroll details need attention.';
+  const action = payeUnavailableAction(paye);
+  return `PAYE-aware estimate is unavailable: ${action}. Annual planning results are still available.`;
+}
+
+function payeUnavailableAction(
+  paye: Exclude<
+    PayeProjectionResult,
+    { kind: 'supported' | 'insufficientInputs' }
+  >,
+): string {
+  const reason = paye.reasons[0]?.code;
+  return reason === 'missingTaxCode'
+    ? 'enter the PAYE tax code from your payslip'
+    : reason === 'unsupportedTaxCode'
+      ? 'use a supported England, Wales, or Northern Ireland tax code, or rely on the annual estimate'
+      : reason === 'contradictoryTaxCodeBasis'
+        ? 'make the tax-code basis match the code shown on your payslip'
+        : reason === 'invalidPayrollYearToDate'
+          ? 'check completed periods and year-to-date pay and tax figures'
+          : reason === 'bonusSacrificeNotAssignableToNextPeriod'
+            ? 'reduce bonus sacrifice or include sufficient next-period additional pay'
+            : 'check the supplied payroll details';
+}
+
+function payeAssumptionDescription(code: string): string {
+  switch (code) {
+    case 'periodPayDerivedFromAnnualSalary':
+      return 'Period pay is derived from the annual base salary.';
+    case 'regularSacrificeApportionedEvenly':
+      return 'Regular salary sacrifice is apportioned evenly across pay periods.';
+    case 'bonusSacrificeAppliedToNextPeriod':
+      return 'Bonus salary sacrifice is applied to the next payroll period.';
+    case 'taxBandsAndCodeAllowancesApportionedByFrequency':
+      return 'Tax bands and tax-code allowances are apportioned by pay frequency.';
+    case 'nationalInsuranceThresholdsAnnualised':
+      return 'Employee National Insurance thresholds are calculated from annual configuration.';
+    case 'kCodeDeductionCappedAtHalfPay':
+      return 'The K-code Income Tax deduction is capped at half of this period’s pay.';
+    case 'yearToDateUnavailable':
+      return 'No year-to-date pay or tax figures were supplied for the cumulative estimate.';
+    case 'yearToDateIgnoredForNonCumulativeBasis':
+      return 'Year-to-date figures are not used for a Month 1 / Week 1 tax code.';
+    case 'otherPayrollDeductionsNotModelled':
+      return 'Other payroll deductions, such as student loans, are not modelled.';
+    default:
+      return 'The PAYE estimate includes a calculation assumption.';
+  }
 }
 
 function payeIssue(paye: PayeProjectionResult): readonly CalculationIssue[] {
@@ -257,6 +326,28 @@ export function summaryOutcome(
       ? {
           payeAwareNetEmploymentPayPence: paye.nextPeriod.netEmploymentPay,
           payeAwareLabel: `PAYE-aware next ${paye.frequency} payslip net employment pay`,
+          payeBreakdown: {
+            label: `PAYE-aware next ${paye.frequency} payslip breakdown`,
+            grossPayPence: paye.nextPeriod.grossPay,
+            pensionSalarySacrificePence: paye.nextPeriod.pensionSalarySacrifice,
+            taxablePayPence: paye.nextPeriod.taxablePay,
+            incomeTaxPence: paye.nextPeriod.incomeTax,
+            employeeNationalInsurancePence:
+              paye.nextPeriod.employeeNationalInsurance,
+            netEmploymentPayPence: paye.nextPeriod.netEmploymentPay,
+          },
+          payeAssumptions: paye.assumptions.map((assumption) => ({
+            code: assumption.code,
+            description: payeAssumptionDescription(assumption.code),
+          })),
+        }
+      : {}),
+    ...(selectedScenario === 'current' && paye.kind === 'invalidOrUnsupported'
+      ? {
+          payeUnavailableReason: {
+            title: 'PAYE-aware estimate is unavailable',
+            description: `To enable it, ${payeUnavailableAction(paye)}. Annual planning results are still available.`,
+          },
         }
       : {}),
     issues: [
@@ -297,50 +388,209 @@ export function planningReport(state: PlannerStoreState): PlanningReport {
   const scenarios = scenarioCards(state);
   const current = state.derived.current.projection;
   const issues = [...state.validationIssues, ...current.issues];
+  const bonusIncome =
+    current.traces.adjustedNetIncome.steps.find(
+      (step) => step.code === 'bonusIncome',
+    )?.amount ?? 0;
+  const equityCertainty = certaintyForEquityIncome(
+    state.plan.facts.equityIncome,
+  );
+  const baseReportInputs: readonly ReportInput[] = [
+    {
+      id: 'base-salary',
+      label: 'Base salary',
+      value: formatPounds(state.plan.facts.baseSalary),
+    },
+    {
+      id: 'bonus',
+      label: 'Expected bonus',
+      value: formatPounds(bonusIncome),
+      status: state.plan.facts.bonus.amountOverride?.certainty ?? 'forecast',
+    },
+    {
+      id: 'equity-income',
+      label: 'RSU and share income',
+      value: formatPounds(
+        state.plan.facts.equityIncome.reduce(
+          (total, income) => total + income.amount,
+          0,
+        ),
+      ),
+      ...(equityCertainty === undefined ? {} : { status: equityCertainty }),
+    },
+    {
+      id: 'taxable-benefits',
+      label: 'Taxable benefits',
+      value: formatPounds(state.plan.facts.taxableBenefits.amount),
+      status: state.plan.facts.taxableBenefits.certainty,
+    },
+    {
+      id: 'savings-interest',
+      label: 'Savings interest',
+      value: formatPounds(state.plan.facts.savingsInterest.amount),
+      status: state.plan.facts.savingsInterest.certainty,
+    },
+    {
+      id: 'other-taxable-income',
+      label: 'Other taxable income',
+      value: formatPounds(state.plan.facts.otherTaxableIncome),
+    },
+    {
+      id: 'employer-pension-contribution',
+      label: 'Employer pension contribution',
+      value: formatPounds(state.plan.facts.employerPensionContribution),
+    },
+    {
+      id: 'current-regular-salary-sacrifice',
+      label: 'Current total regular salary sacrifice',
+      value: formatPounds(state.plan.current.regularSalarySacrifice),
+    },
+    {
+      id: 'current-bonus-salary-sacrifice',
+      label: 'Current bonus salary sacrifice',
+      value: formatPounds(state.plan.current.bonusSalarySacrifice),
+    },
+    {
+      id: 'current-sipp-net-contribution',
+      label: 'Current SIPP contribution paid',
+      value: formatPounds(state.plan.current.sippNetContribution),
+    },
+    {
+      id: 'current-gift-aid-cash-donation',
+      label: 'Current Gift Aid donation',
+      value: formatPounds(state.plan.current.giftAidCashDonation),
+    },
+    {
+      id: 'alternative-regular-salary-sacrifice',
+      label: 'Alternative total regular salary sacrifice',
+      value: formatPounds(state.plan.alternative.regularSalarySacrifice),
+    },
+    {
+      id: 'alternative-bonus-salary-sacrifice',
+      label: 'Alternative bonus salary sacrifice',
+      value: formatPounds(state.plan.alternative.bonusSalarySacrifice),
+    },
+    {
+      id: 'alternative-sipp-net-contribution',
+      label: 'Alternative SIPP contribution paid',
+      value: formatPounds(state.plan.alternative.sippNetContribution),
+    },
+    {
+      id: 'alternative-gift-aid-cash-donation',
+      label: 'Alternative Gift Aid donation',
+      value: formatPounds(state.plan.alternative.giftAidCashDonation),
+    },
+    {
+      id: 'max-additional-regular-salary-sacrifice',
+      label: 'Maximum additional regular salary sacrifice',
+      value: formatPounds(state.plan.maxAdditionalRegularSalarySacrifice),
+    },
+    {
+      id: 'target-ani',
+      label: 'ANI target',
+      value: formatPounds(state.plan.targetAni),
+    },
+    {
+      id: 'statutory-childcare-ani-threshold',
+      label: 'Statutory childcare ANI threshold',
+      value: formatPounds(state.derived.config.childcareAniThreshold),
+    },
+  ];
+
+  const payroll = state.plan.facts.payroll;
+  const payrollReportInputs: readonly ReportInput[] =
+    payroll === undefined
+      ? []
+      : [
+          {
+            id: 'payroll-tax-code',
+            label: 'PAYE tax code',
+            value: payroll.taxCode,
+          },
+          {
+            id: 'payroll-tax-code-basis',
+            label: 'PAYE tax-code basis',
+            value: payroll.taxCodeBasis,
+          },
+          {
+            id: 'payroll-pay-frequency',
+            label: 'PAYE pay frequency',
+            value: payroll.payFrequency,
+          },
+          ...(payroll.nextPeriodAdditionalGrossPay === undefined
+            ? []
+            : [
+                {
+                  id: 'payroll-next-period-additional-gross-pay',
+                  label: 'Next-period bonus or additional pay',
+                  value: formatPounds(payroll.nextPeriodAdditionalGrossPay),
+                },
+              ]),
+          ...(payroll.yearToDate === undefined
+            ? []
+            : [
+                {
+                  id: 'payroll-year-to-date-periods',
+                  label: 'Completed payroll periods',
+                  value: String(payroll.yearToDate.completedPeriods),
+                },
+                {
+                  id: 'payroll-year-to-date-taxable-pay',
+                  label: 'Year-to-date taxable pay',
+                  value: formatPounds(payroll.yearToDate.taxablePay),
+                },
+                {
+                  id: 'payroll-year-to-date-income-tax-paid',
+                  label: 'Year-to-date Income Tax paid',
+                  value: formatPounds(payroll.yearToDate.incomeTaxPaid),
+                },
+              ]),
+        ];
+  const reportInputs = [...baseReportInputs, ...payrollReportInputs];
+
   return {
     taxYearLabel: state.plan.taxYear,
     taxConfigVersion: state.derived.config.version,
-    inputs: [
-      {
-        id: 'base-salary',
-        label: 'Base salary',
-        value: formatPounds(state.plan.facts.baseSalary),
-      },
-      {
-        id: 'bonus',
-        label: 'Bonus',
-        value: formatPounds(
-          current.traces.adjustedNetIncome.steps.find(
-            (step) => step.code === 'bonusIncome',
-          )?.amount ?? 0,
-        ),
-        status: state.plan.facts.bonus.amountOverride?.certainty ?? 'forecast',
-      },
-      {
-        id: 'target-ani',
-        label: 'ANI target',
-        value: formatPounds(state.plan.targetAni),
-      },
-    ],
+    inputs: reportInputs,
     scenarios: scenarios.map((scenario) => ({
       id: scenario.id,
       label: scenario.name,
       adjustedNetIncome: scenario.adjustedNetIncome,
       annualNetEmploymentPay: scenario.annualNetEmploymentPay ?? 'Not supplied',
       annualDisposableCash: scenario.annualDisposableCash,
+      annualPensionInput: scenario.annualPensionInput,
       targetPosition: scenario.targetHeadroom,
     })),
-    notices: issues.map((issue, index) => ({
-      id: `${issue.code}-${index}`,
-      severity: issue.severity,
-      title: issue.code,
-      body: 'See the plan notices and calculation details above for the supplied calculation context.',
-    })),
+    notices: issues.map((issue, index) => {
+      const copy = messageCopy(issue, issueCopy);
+      return {
+        id: `${issue.code}-${index}`,
+        severity: issue.severity,
+        title: copy.title,
+        body: copy.description,
+      };
+    }),
+    insights: state.derived.insights.map((insight, index) => {
+      const copy = messageCopy(insight, insightCopy);
+      return {
+        id: `${insight.code}-${index}`,
+        severity: insight.severity,
+        title: copy.title,
+        body: copy.description,
+      };
+    }),
     assumptions: [
       'Annual estimate for one PAYE employment in England, Wales, or Northern Ireland.',
       state.derived.paye.kind === 'supported'
         ? 'PAYE-aware figures are estimates and are not payslip reconciliation.'
-        : 'PAYE-aware next-payslip figures are unavailable until sufficient payroll details are supplied.',
+        : state.derived.paye.kind === 'invalidOrUnsupported'
+          ? `PAYE-aware next-payslip figures are unavailable until you ${payeUnavailableAction(state.derived.paye)}.`
+          : 'PAYE-aware next-payslip figures are unavailable until sufficient payroll details are supplied.',
+      ...(state.derived.paye.kind === 'supported'
+        ? state.derived.paye.assumptions.map((assumption) =>
+            payeAssumptionDescription(assumption.code),
+          )
+        : []),
     ],
     traces: tracesFor(current).map((trace) => ({
       id: trace.id,

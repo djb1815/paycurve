@@ -17,12 +17,12 @@
   grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
 }
 .metrics > div {
-  background: var(--color-surface-muted, #f1f5f9);
+  background: var(--colour-surface-subtle);
   border-radius: 0.75rem;
   padding: 1rem;
 }
 .metrics dt {
-  color: var(--color-muted, #475569);
+  color: var(--colour-text-muted);
   font-size: 0.875rem;
 }
 .metrics dd {
@@ -32,15 +32,15 @@
   margin: 0.35rem 0 0;
 }
 .metrics .detail {
-  color: var(--color-muted, #475569);
+  color: var(--colour-text-muted);
   font-size: 0.75rem;
   font-weight: 400;
 }
 .positive {
-  border-inline-start: 0.25rem solid var(--color-positive, #15803d);
+  border-inline-start: 0.25rem solid var(--colour-positive);
 }
 .warning {
-  border-inline-start: 0.25rem solid var(--color-warning, #b45309);
+  border-inline-start: 0.25rem solid var(--colour-warning);
 }
 .default {
   border-inline-start: 0.25rem solid transparent;
@@ -65,7 +65,7 @@
 }
 .deltas th,
 .deltas td {
-  border-block-end: 1px solid var(--color-border, #cbd5e1);
+  border-block-end: 1px solid var(--colour-border);
   padding: 0.5rem;
   text-align: start;
 }
@@ -86,12 +86,12 @@
   font-weight: 700;
 }
 .messageerror {
-  color: var(--color-danger, #b91c1c);
+  color: var(--colour-danger);
 }
 .messagewarning {
-  color: var(--color-warning, #b45309);
+  color: var(--colour-warning);
 }
 .messageinformation,
 .messagepositive {
-  color: var(--color-muted, #475569);
+  color: var(--colour-text-muted);
 }

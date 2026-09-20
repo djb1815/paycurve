@@ -210,9 +210,10 @@ export function InputsPanel({
 }: InputsPanelProps) {
   const validationId = useId();
   const [submitted, setSubmitted] = useState(false);
-  const [payrollOpen, setPayrollOpen] = useState(
-    form?.payroll?.enabled ?? false,
-  );
+  // The plan owns disclosure state. Keeping this controlled means an imported
+  // payroll record opens immediately without a synchronising effect, and none
+  // of its fields can be replaced by a component-local default.
+  const payrollOpen = form?.payroll?.enabled ?? false;
   const sections = form?.sections ?? [
     {
       id: 'income-and-adjustments',
@@ -261,7 +262,6 @@ export function InputsPanel({
   }
 
   function togglePayroll(enabled: boolean) {
-    setPayrollOpen(enabled);
     onPayrollDisclosureChange?.(enabled);
   }
 

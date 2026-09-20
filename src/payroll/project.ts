@@ -41,9 +41,9 @@ export type PayrollAssumptionCode =
   | 'bonusSacrificeAppliedToNextPeriod'
   | 'taxBandsAndCodeAllowancesApportionedByFrequency'
   | 'nationalInsuranceThresholdsAnnualised'
+  | 'kCodeDeductionCappedAtHalfPay'
   | 'yearToDateUnavailable'
   | 'yearToDateIgnoredForNonCumulativeBasis'
-  | 'kCodeTaxCapNotModelled'
   | 'otherPayrollDeductionsNotModelled';
 
 export interface PayrollAssumption {
@@ -422,7 +422,14 @@ const calculateIncomeTax = (
       ? (payroll.yearToDate?.incomeTaxPaid ?? 0)
       : 0;
 
-  return taxDue - incomeTaxPaid;
+  const taxForPeriod = taxDue - incomeTaxPaid;
+
+  // HMRC limits PAYE Income Tax deductions under a K code to half of the
+  // employee's pay for the current period. A cumulative calculation can still
+  // produce a refund, which must remain uncapped.
+  return parsedCode.kind === 'kCode'
+    ? Math.min(taxForPeriod, Math.floor(taxablePay / 2))
+    : taxForPeriod;
 };
 
 /**
@@ -525,6 +532,16 @@ export const projectPaye = (
       parameters: EMPTY_PARAMETERS,
     });
   }
+  if (
+    parsed.code.kind === 'kCode' &&
+    incomeTax > 0 &&
+    incomeTax === Math.floor(taxablePay / 2)
+  ) {
+    assumptions.push({
+      code: 'kCodeDeductionCappedAtHalfPay',
+      parameters: { maximumDeduction: incomeTax },
+    });
+  }
   if (payroll.yearToDate === undefined) {
     assumptions.push({
       code: 'yearToDateUnavailable',
@@ -536,13 +553,6 @@ export const projectPaye = (
       parameters: EMPTY_PARAMETERS,
     });
   }
-  if (parsed.code.kind === 'kCode') {
-    assumptions.push({
-      code: 'kCodeTaxCapNotModelled',
-      parameters: EMPTY_PARAMETERS,
-    });
-  }
-
   return {
     kind: 'supported',
     frequency: payroll.payFrequency,

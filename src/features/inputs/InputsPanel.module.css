@@ -8,7 +8,7 @@
   margin: 0;
 }
 .eyebrow {
-  color: var(--color-accent, #3157a4);
+  color: var(--colour-accent);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -19,7 +19,7 @@
   gap: 1rem;
 }
 .section {
-  border: 1px solid var(--color-border, #cbd5e1);
+  border: 1px solid var(--colour-border);
   border-radius: 0.75rem;
   display: grid;
   gap: 0.875rem;
@@ -34,7 +34,7 @@
 .sectionDescription,
 .help,
 .unitLabel {
-  color: var(--color-muted, #475569);
+  color: var(--colour-text-muted);
   font-size: 0.875rem;
 }
 .grid {
@@ -43,7 +43,7 @@
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
 }
 .field {
-  border: 1px solid var(--color-border, #cbd5e1);
+  border: 1px solid var(--colour-border);
   border-radius: 0.625rem;
   display: grid;
   gap: 0.5rem;
@@ -63,7 +63,7 @@
 .inputWithUnit input,
 .field select,
 .status select {
-  border: 1px solid var(--color-border, #94a3b8);
+  border: 1px solid var(--colour-border);
   border-radius: 0.375rem;
   box-sizing: border-box;
   font: inherit;
@@ -71,7 +71,7 @@
   width: 100%;
 }
 .unit {
-  color: var(--color-muted, #475569);
+  color: var(--colour-text-muted);
   font-size: 0.875rem;
   white-space: nowrap;
 }
@@ -90,12 +90,12 @@
   gap: 0.5rem;
 }
 .limitation {
-  background: var(--color-warning-surface, #fff7dd);
-  border-inline-start: 0.3rem solid var(--color-warning, #9a6700);
+  background: var(--colour-surface-subtle);
+  border-inline-start: 0.3rem solid var(--colour-warning);
   padding: 0.75rem;
 }
 .validationSummary {
-  border: 2px solid var(--color-danger, #b42318);
+  border: 2px solid var(--colour-danger);
   border-radius: 0.625rem;
   display: grid;
   gap: 0.5rem;
@@ -106,15 +106,15 @@
   padding-inline-start: 1.25rem;
 }
 .error {
-  color: var(--color-danger, #b42318);
+  color: var(--colour-danger);
   font-size: 0.875rem;
   font-weight: 700;
 }
 .reviewButton {
-  background: var(--color-accent, #3157a4);
+  background: var(--colour-accent);
   border: 0;
   border-radius: 0.375rem;
-  color: white;
+  color: var(--colour-accent-contrast);
   font: inherit;
   font-weight: 700;
   justify-self: start;
@@ -124,7 +124,7 @@
 input:focus-visible,
 select:focus-visible,
 a:focus-visible {
-  outline: 3px solid var(--color-focus, #1d4ed8);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 @media (max-width: 35rem) {

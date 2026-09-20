@@ -20,12 +20,20 @@ export interface ReportScenario {
   readonly adjustedNetIncome: string;
   readonly annualNetEmploymentPay: string;
   readonly annualDisposableCash: string;
+  readonly annualPensionInput: string;
   readonly targetPosition?: string;
 }
 
 export interface ReportNotice {
   readonly id: string;
   readonly severity: 'error' | 'warning' | 'information';
+  readonly title: string;
+  readonly body: string;
+}
+
+export interface ReportInsight {
+  readonly id: string;
+  readonly severity: 'information' | 'positive' | 'warning';
   readonly title: string;
   readonly body: string;
 }
@@ -67,6 +75,7 @@ export interface PlanningReport {
   readonly inputs: readonly ReportInput[];
   readonly scenarios: readonly ReportScenario[];
   readonly notices?: readonly ReportNotice[];
+  readonly insights?: readonly ReportInsight[];
   readonly assumptions?: readonly string[];
   readonly traces?: readonly ReportTrace[];
   readonly chartAlternative?: ReportChartAlternative;
@@ -131,6 +140,7 @@ function reportContent(report: PlanningReport) {
                 <th scope="col">Adjusted net income</th>
                 <th scope="col">Annual net employment pay</th>
                 <th scope="col">Annual disposable cash</th>
+                <th scope="col">Annual pension input</th>
                 <th scope="col">Target position</th>
               </tr>
             </thead>
@@ -141,6 +151,7 @@ function reportContent(report: PlanningReport) {
                   <td>{scenario.adjustedNetIncome}</td>
                   <td>{scenario.annualNetEmploymentPay}</td>
                   <td>{scenario.annualDisposableCash}</td>
+                  <td>{scenario.annualPensionInput}</td>
                   <td>{scenario.targetPosition ?? 'Not supplied'}</td>
                 </tr>
               ))}
@@ -159,6 +170,25 @@ function reportContent(report: PlanningReport) {
                   {notice.severity.toUpperCase()}: {notice.title}
                 </strong>{' '}
                 {notice.body}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {report.insights?.length ? (
+        <section aria-labelledby="report-insights-heading">
+          <h3 id="report-insights-heading">Planning insights</h3>
+          <ul className={styles.notices}>
+            {report.insights.map((insight) => (
+              <li className={styles[insight.severity]} key={insight.id}>
+                <strong>
+                  {insight.severity === 'positive'
+                    ? 'INSIGHT'
+                    : insight.severity.toUpperCase()}
+                  : {insight.title}
+                </strong>{' '}
+                {insight.body}
               </li>
             ))}
           </ul>
@@ -210,7 +240,7 @@ function reportContent(report: PlanningReport) {
               <thead>
                 <tr>
                   <th scope="col">Point</th>
-                  <th scope="col">Regular sacrifice</th>
+                  <th scope="col">Additional regular sacrifice</th>
                   <th scope="col">Adjusted net income</th>
                   <th scope="col">Net employment pay</th>
                   <th scope="col">Disposable cash</th>

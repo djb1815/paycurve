@@ -229,6 +229,6 @@ export const plannerInputsFixture: PlannerInputsForm = {
   },
 };
 
-/** Compatibility fixture retained until T12 passes `plannerInputsFixture` through `form`. */
+/** Compatibility fixture retained for isolated component examples and tests. */
 export const inputsFixture: readonly PlannerInputField[] =
   plannerInputsFixture.sections.flatMap((section) => section.fields);

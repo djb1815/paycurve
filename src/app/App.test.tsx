@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import type { PlannerState } from '../domain';
 import { DEFAULT_PLANNER_PLAN } from '../state';
@@ -106,5 +106,121 @@ describe('App integration', () => {
       );
     });
     expect(screen.getAllByText('£120,000')).not.toHaveLength(0);
+  });
+
+  it('communicates reached, already-below, and unreachable targets without relying on colour', () => {
+    const { rerender } = render(<App initialPlan={plan()} />);
+    expect(
+      screen.getByText(/minimum regular sacrifice needed to reach the target/i),
+    ).toBeInTheDocument();
+
+    rerender(
+      <App
+        key="already-below"
+        initialPlan={plan({
+          facts: { ...DEFAULT_PLANNER_PLAN.facts, baseSalary: 9_900_000 },
+          maxAdditionalRegularSalarySacrifice: 0,
+        })}
+      />,
+    );
+    expect(
+      screen.getByText(/current allocation already meets the target/i),
+    ).toBeInTheDocument();
+
+    rerender(
+      <App
+        key="unreachable"
+        initialPlan={plan({ maxAdditionalRegularSalarySacrifice: 500_000 })}
+      />,
+    );
+    expect(
+      screen.getByText(
+        /target cannot be reached within the selected sacrifice limit/i,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText('Optimal limit')).not.toHaveLength(0);
+  });
+
+  it('includes all supplied financial and payroll inputs in the printable report', () => {
+    render(
+      <App
+        initialPlan={plan({
+          current: {
+            regularSalarySacrifice: 120_000,
+            bonusSalarySacrifice: 80_000,
+            sippNetContribution: 40_000,
+            giftAidCashDonation: 30_000,
+          },
+          facts: {
+            ...DEFAULT_PLANNER_PLAN.facts,
+            baseSalary: 12_000_000,
+            bonus: {
+              guidePercentage: 0,
+              amountOverride: { amount: 500_000, certainty: 'actual' },
+            },
+            equityIncome: [
+              { id: 'rsu-one', amount: 300_000, certainty: 'forecast' },
+            ],
+            taxableBenefits: { amount: 20_000, certainty: 'actual' },
+            savingsInterest: { amount: 10_000, certainty: 'forecast' },
+            otherTaxableIncome: 5_000,
+            employerPensionContribution: 70_000,
+            payroll: {
+              taxCode: '1257L',
+              taxCodeBasis: 'cumulative',
+              payFrequency: 'monthly',
+              nextPeriodAdditionalGrossPay: 50_000,
+              yearToDate: {
+                completedPeriods: 3,
+                taxablePay: 3_000_000,
+                incomeTaxPaid: 600_000,
+              },
+            },
+          },
+        })}
+      />,
+    );
+
+    const report = screen
+      .getByRole('heading', { name: 'Scenario report' })
+      .closest('section');
+    expect(report).not.toBeNull();
+    const reportScope = within(report!);
+    for (const label of [
+      'Expected bonus',
+      'RSU and share income',
+      'Taxable benefits',
+      'Savings interest',
+      'Other taxable income',
+      'Employer pension contribution',
+      'Current total regular salary sacrifice',
+      'Current bonus salary sacrifice',
+      'Current SIPP contribution paid',
+      'Current Gift Aid donation',
+      'Maximum additional regular salary sacrifice',
+      'PAYE tax code',
+      'Year-to-date taxable pay',
+    ]) {
+      expect(reportScope.getByText(label)).toBeInTheDocument();
+    }
+  });
+
+  it('supports keyboard scenario selection, all themes, and printing', async () => {
+    const user = userEvent.setup();
+    const print = vi.spyOn(window, 'print').mockImplementation(() => {});
+    render(<App initialPlan={plan()} />);
+
+    screen.getByRole('radio', { name: /Current/i }).focus();
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByRole('radio', { name: /Optimal/i })).toBeChecked();
+
+    await user.click(screen.getByRole('radio', { name: 'Light' }));
+    expect(document.documentElement).toHaveAttribute('data-theme', 'light');
+    await user.click(screen.getByRole('radio', { name: 'System' }));
+    expect(document.documentElement).not.toHaveAttribute('data-theme');
+
+    await user.click(screen.getByRole('button', { name: 'Print report' }));
+    expect(print).toHaveBeenCalledOnce();
+    print.mockRestore();
   });
 });

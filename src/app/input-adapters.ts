@@ -7,6 +7,36 @@ import { formatInputPounds } from './format';
 export type EditableScenario = Exclude<ScenarioId, 'optimal'>;
 export type RawValues = Readonly<Record<string, string>>;
 
+const EQUITY_FIELD_PREFIX = 'equity-event:';
+
+/**
+ * Input ids encode the persisted event id rather than its array position, so
+ * editing or removing one vest event cannot redirect an in-progress edit to a
+ * different imported event.
+ */
+export function equityFieldId(
+  eventId: string,
+  field: 'amount' | 'label' | 'vest-date' | 'remove',
+): string {
+  return `${EQUITY_FIELD_PREFIX}${encodeURIComponent(eventId)}:${field}`;
+}
+
+export function equityFieldDetails(
+  id: string,
+): { readonly eventId: string; readonly field: string } | undefined {
+  if (!id.startsWith(EQUITY_FIELD_PREFIX)) return undefined;
+  const separator = id.lastIndexOf(':');
+  if (separator === EQUITY_FIELD_PREFIX.length) return undefined;
+  const encodedEventId = id.slice(EQUITY_FIELD_PREFIX.length, separator);
+  const field = id.slice(separator + 1);
+  if (field === '') return undefined;
+  try {
+    return { eventId: decodeURIComponent(encodedEventId), field };
+  } catch {
+    return undefined;
+  }
+}
+
 function valueFor(rawValues: RawValues, id: string, value: number): string {
   return rawValues[id] ?? formatInputPounds(value);
 }
@@ -73,6 +103,47 @@ export function inputForm(
     )?.amount ?? 0;
   const payroll = facts.payroll;
   const bonusGuideError = inputError(issues, 'facts.bonus.guidePercentage');
+  const equityFields = facts.equityIncome.flatMap((income, index) => {
+    const amountId = equityFieldId(income.id, 'amount');
+    const labelId = equityFieldId(income.id, 'label');
+    const vestDateId = equityFieldId(income.id, 'vest-date');
+    const removeId = equityFieldId(income.id, 'remove');
+    const eventLabel =
+      facts.equityIncome.length === 1
+        ? 'RSU and share income'
+        : `RSU and share income ${index + 1}`;
+    return [
+      moneyField(
+        amountId,
+        eventLabel,
+        income.amount,
+        'Taxable value of shares expected to vest in this tax year.',
+        `facts.equityIncome.${index}.amount`,
+        { status: income.certainty },
+      ),
+      field(
+        labelId,
+        `RSU / share event ${index + 1} label`,
+        rawValues[labelId] ?? income.label ?? '',
+        'Optional label to help distinguish this vest event.',
+        { control: 'text', unit: 'text' },
+      ),
+      field(
+        vestDateId,
+        `RSU / share event ${index + 1} vest date`,
+        rawValues[vestDateId] ?? income.vestDate ?? '',
+        'Optional vest date in ISO format, for example 2026-08-15.',
+        { control: 'text', unit: 'date (YYYY-MM-DD)' },
+      ),
+      field(
+        removeId,
+        `Remove RSU / share event ${index + 1}`,
+        'false',
+        'Remove this vest event from the annual income estimate.',
+        { control: 'checkbox', unit: 'choice' },
+      ),
+    ];
+  });
 
   return {
     sections: [
@@ -118,13 +189,13 @@ export function inputForm(
                   : ''),
             },
           ),
-          moneyField(
-            'equity-income',
-            'RSU and share income',
-            facts.equityIncome[0]?.amount ?? 0,
-            'Taxable value of shares expected to vest in this tax year.',
-            'facts.equityIncome.0.amount',
-            { status: facts.equityIncome[0]?.certainty ?? 'forecast' },
+          ...equityFields,
+          field(
+            'equity-add-event',
+            'Add an RSU / share vest event',
+            'false',
+            'Add another taxable equity vest event. Events remain separate in your local plan.',
+            { control: 'checkbox', unit: 'choice' },
           ),
           moneyField(
             'taxable-benefits',

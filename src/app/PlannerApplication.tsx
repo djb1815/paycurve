@@ -16,6 +16,7 @@ import {
 
 import { downloadPlanExport } from './export';
 import {
+  equityFieldDetails,
   inputForm,
   type EditableScenario,
   type RawValues,
@@ -33,6 +34,18 @@ import {
   tracesFor,
 } from './result-adapters';
 import styles from './App.module.css';
+
+let nextEquityEventId = 1;
+
+function newEquityEventId(existingIds: readonly string[]): string {
+  let id = `equity-event-${nextEquityEventId}`;
+  while (existingIds.includes(id)) {
+    nextEquityEventId += 1;
+    id = `equity-event-${nextEquityEventId}`;
+  }
+  nextEquityEventId += 1;
+  return id;
+}
 
 export function PlannerApplication() {
   const { actions, state } = usePlanner();
@@ -67,6 +80,18 @@ export function PlannerApplication() {
 
   function updatePence(id: string, value: number | undefined) {
     const invalid = value ?? -1;
+    const equity = equityFieldDetails(id);
+    if (equity?.field === 'amount') {
+      updateFacts((facts) => ({
+        ...facts,
+        equityIncome: facts.equityIncome.map((income) =>
+          income.id === equity.eventId
+            ? { ...income, amount: invalid }
+            : income,
+        ),
+      }));
+      return;
+    }
     switch (id) {
       case 'base-salary':
         updateFacts((facts) => ({ ...facts, baseSalary: invalid }));
@@ -89,18 +114,6 @@ export function PlannerApplication() {
                       facts.bonus.amountOverride?.certainty ?? 'forecast',
                   },
                 },
-        }));
-        return;
-      case 'equity-income':
-        updateFacts((facts) => ({
-          ...facts,
-          equityIncome: [
-            {
-              id: 'equity-income',
-              amount: invalid,
-              certainty: facts.equityIncome[0]?.certainty ?? 'forecast',
-            },
-          ],
         }));
         return;
       case 'taxable-benefits':
@@ -175,6 +188,49 @@ export function PlannerApplication() {
 
   function updateValue(id: string, value: string) {
     setRaw(id, value);
+    const equity = equityFieldDetails(id);
+    if (id === 'equity-add-event' && value === 'true') {
+      updateFacts((facts) => ({
+        ...facts,
+        equityIncome: [
+          ...facts.equityIncome,
+          {
+            id: newEquityEventId(facts.equityIncome.map((income) => income.id)),
+            amount: 0,
+            certainty: 'forecast',
+          },
+        ],
+      }));
+      return;
+    }
+    if (equity?.field === 'remove' && value === 'true') {
+      updateFacts((facts) => ({
+        ...facts,
+        equityIncome: facts.equityIncome.filter(
+          (income) => income.id !== equity.eventId,
+        ),
+      }));
+      return;
+    }
+    if (equity?.field === 'label' || equity?.field === 'vest-date') {
+      updateFacts((facts) => ({
+        ...facts,
+        equityIncome: facts.equityIncome.map((income) => {
+          if (income.id !== equity.eventId) return income;
+          if (equity.field === 'label') {
+            const { label: _label, ...withoutLabel } = income;
+            return value.trim() === ''
+              ? withoutLabel
+              : { ...income, label: value };
+          }
+          const { vestDate: _vestDate, ...withoutVestDate } = income;
+          return value.trim() === ''
+            ? withoutVestDate
+            : { ...income, vestDate: value };
+        }),
+      }));
+      return;
+    }
     if (id === 'bonus-guide-percentage') {
       const percentage = Number(value);
       updateFacts((facts) => ({
@@ -256,13 +312,14 @@ export function PlannerApplication() {
           },
         };
       }
-      if (id === 'equity-income') {
-        const equity = facts.equityIncome[0] ?? {
-          id: 'equity-income',
-          amount: 0,
-          certainty,
+      const equity = equityFieldDetails(id);
+      if (equity?.field === 'amount') {
+        return {
+          ...facts,
+          equityIncome: facts.equityIncome.map((income) =>
+            income.id === equity.eventId ? { ...income, certainty } : income,
+          ),
         };
-        return { ...facts, equityIncome: [{ ...equity, certainty }] };
       }
       if (id === 'taxable-benefits') {
         return {
@@ -286,6 +343,7 @@ export function PlannerApplication() {
         const { payroll: _payroll, ...withoutPayroll } = facts;
         return withoutPayroll;
       }
+      if (facts.payroll) return facts;
       return {
         ...facts,
         payroll: {
@@ -362,6 +420,7 @@ export function PlannerApplication() {
             onSelectedIndexChange={(index) => {
               const point = state.derived.curve[index];
               if (point) {
+                actions.resetAlternative('current');
                 actions.updateAllocationField(
                   'alternative',
                   'regularSalarySacrifice',

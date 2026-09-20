@@ -108,6 +108,47 @@ describe('SummaryPanel', () => {
     ).toBeInTheDocument();
     expect(within(table).getByText('-£100')).toBeInTheDocument();
   });
+
+  it('renders PAYE breakdown, assumptions, and an actionable unavailable reason', () => {
+    render(
+      <SummaryPanel
+        outcome={{
+          ...outcome,
+          payeAssumptions: [
+            {
+              code: 'periodPayDerivedFromAnnualSalary',
+              description: 'Period pay is derived from annual base salary.',
+            },
+          ],
+          payeBreakdown: {
+            label: 'PAYE-aware next monthly payslip breakdown',
+            grossPayPence: 500_000,
+            pensionSalarySacrificePence: 10_000,
+            taxablePayPence: 490_000,
+            incomeTaxPence: 90_000,
+            employeeNationalInsurancePence: 25_000,
+            netEmploymentPayPence: 375_000,
+          },
+          payeUnavailableReason: {
+            title: 'PAYE-aware estimate is unavailable',
+            description: 'Enter the PAYE tax code from your payslip.',
+          },
+        }}
+      />,
+    );
+
+    expect(
+      screen.getByRole('heading', {
+        name: 'PAYE-aware next monthly payslip breakdown',
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Period pay is derived from annual base salary.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Enter the PAYE tax code from your payslip.'),
+    ).toBeInTheDocument();
+  });
 });
 
 describe('summary formatting', () => {

@@ -80,13 +80,16 @@ describe('SettingsPanel', () => {
     );
 
     expect(screen.getByText(/data is sensitive/i)).toBeInTheDocument();
-    const link = screen.getByRole('link', {
+    const links = screen.getAllByRole('link', {
       name: /hmrc: adjusted net income/i,
     });
-    expect(link).toHaveAttribute(
-      'href',
-      'https://www.gov.uk/guidance/adjusted-net-income',
-    );
-    expect(link.getAttribute('href')).not.toContain('?');
+    expect(links).not.toHaveLength(0);
+    for (const link of links) {
+      expect(link).toHaveAttribute(
+        'href',
+        'https://www.gov.uk/guidance/adjusted-net-income',
+      );
+      expect(link.getAttribute('href')).not.toContain('?');
+    }
   });
 });

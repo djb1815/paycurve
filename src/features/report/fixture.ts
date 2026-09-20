@@ -38,6 +38,7 @@ export const planningReportFixture: PlanningReport = {
       adjustedNetIncome: '£108,400.00',
       annualNetEmploymentPay: '£73,002.00',
       annualDisposableCash: '£73,002.00',
+      annualPensionInput: '£0.00',
       targetPosition: '£8,400.00 above target',
     },
     {
@@ -46,7 +47,16 @@ export const planningReportFixture: PlanningReport = {
       adjustedNetIncome: '£100,000.00',
       annualNetEmploymentPay: '£68,884.00',
       annualDisposableCash: '£68,884.00',
+      annualPensionInput: '£8,400.00',
       targetPosition: 'At target',
+    },
+  ],
+  insights: [
+    {
+      id: 'headroom',
+      severity: 'information',
+      title: 'Forecast amounts affect headroom',
+      body: 'Confirm the plan when forecast income becomes actual.',
     },
   ],
   notices: [

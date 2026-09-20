@@ -40,6 +40,26 @@ export interface ScenarioDelta {
   readonly annualDisposableCashPence?: number;
 }
 
+export interface PayeBreakdown {
+  readonly label: string;
+  readonly grossPayPence: number;
+  readonly pensionSalarySacrificePence: number;
+  readonly taxablePayPence: number;
+  readonly incomeTaxPence: number;
+  readonly employeeNationalInsurancePence: number;
+  readonly netEmploymentPayPence: number;
+}
+
+export interface PayeAssumption {
+  readonly code: string;
+  readonly description: string;
+}
+
+export interface PayeUnavailableReason {
+  readonly title: string;
+  readonly description: string;
+}
+
 export interface SummaryOutcome {
   readonly scenarioLabel: string;
   /** Describes whether the supplied inputs contain forecasts, actuals, or both. */
@@ -57,6 +77,12 @@ export interface SummaryOutcome {
   readonly payeAwarePeriodLabel?: string;
   /** Temporary integration override when the source provides a complete label. */
   readonly payeAwareLabel?: string;
+  /** A next-payslip breakdown when optional payroll inputs support it. */
+  readonly payeBreakdown?: PayeBreakdown;
+  /** Structured caveats returned by the PAYE projection adapter. */
+  readonly payeAssumptions?: readonly PayeAssumption[];
+  /** A specific action when the optional PAYE estimate cannot be produced. */
+  readonly payeUnavailableReason?: PayeUnavailableReason;
   readonly issues?: readonly SummaryIssue[];
   readonly insights?: readonly SummaryInsight[];
   readonly deltas?: readonly ScenarioDelta[];
@@ -201,6 +227,70 @@ export function SummaryPanel({
               ))}
             </tbody>
           </table>
+        </section>
+      ) : null}
+      {outcome?.payeBreakdown ? (
+        <section
+          aria-labelledby="paye-breakdown-heading"
+          className={styles.deltas}
+        >
+          <h3 id="paye-breakdown-heading">{outcome.payeBreakdown.label}</h3>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Gross pay</th>
+                <th scope="col">Salary sacrifice</th>
+                <th scope="col">Taxable pay</th>
+                <th scope="col">Income Tax</th>
+                <th scope="col">Employee NI</th>
+                <th scope="col">Net employment pay</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{formatPounds(outcome.payeBreakdown.grossPayPence)}</td>
+                <td>
+                  {formatPounds(
+                    outcome.payeBreakdown.pensionSalarySacrificePence,
+                  )}
+                </td>
+                <td>{formatPounds(outcome.payeBreakdown.taxablePayPence)}</td>
+                <td>{formatPounds(outcome.payeBreakdown.incomeTaxPence)}</td>
+                <td>
+                  {formatPounds(
+                    outcome.payeBreakdown.employeeNationalInsurancePence,
+                  )}
+                </td>
+                <td>
+                  {formatPounds(outcome.payeBreakdown.netEmploymentPayPence)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      ) : null}
+      {outcome?.payeAssumptions?.length ? (
+        <section
+          aria-labelledby="paye-assumptions-heading"
+          className={styles.messages}
+        >
+          <h3 id="paye-assumptions-heading">PAYE assumptions</h3>
+          <ul>
+            {outcome.payeAssumptions.map((assumption) => (
+              <li key={assumption.code}>{assumption.description}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {outcome?.payeUnavailableReason ? (
+        <section
+          aria-labelledby="paye-unavailable-heading"
+          className={styles.messages}
+        >
+          <h3 id="paye-unavailable-heading">
+            {outcome.payeUnavailableReason.title}
+          </h3>
+          <p>{outcome.payeUnavailableReason.description}</p>
         </section>
       ) : null}
       {outcome?.issues?.length ? (

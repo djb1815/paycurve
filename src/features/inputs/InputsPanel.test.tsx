@@ -39,11 +39,20 @@ function renderFixture(form: PlannerInputsForm = plannerInputsFixture) {
       });
     }
 
+    function updatePayrollDisclosure(enabled: boolean) {
+      onPayrollDisclosureChange(enabled);
+      setCurrentForm((current) =>
+        current.payroll
+          ? { ...current, payroll: { ...current.payroll, enabled } }
+          : current,
+      );
+    }
+
     return (
       <InputsPanel
         fields={[]}
         form={currentForm}
-        onPayrollDisclosureChange={onPayrollDisclosureChange}
+        onPayrollDisclosureChange={updatePayrollDisclosure}
         onPenceValueChange={onPenceValueChange}
         onStatusChange={onStatusChange}
         onValueChange={updateValue}
@@ -114,6 +123,28 @@ describe('InputsPanel', () => {
     expect(
       screen.getByLabelText('Year-to-date taxable pay'),
     ).toBeInTheDocument();
+  });
+
+  it('uses the supplied payroll disclosure state after an import-like form replacement', () => {
+    const importedForm: PlannerInputsForm = {
+      ...plannerInputsFixture,
+      payroll: {
+        ...plannerInputsFixture.payroll!,
+        enabled: true,
+        fields: plannerInputsFixture.payroll!.fields.map((field) =>
+          field.id === 'payroll-tax-code'
+            ? { ...field, value: '1257L' }
+            : field,
+        ),
+      },
+    };
+
+    renderFixture(importedForm);
+
+    expect(
+      screen.getByRole('checkbox', { name: 'Add PAYE details' }),
+    ).toBeChecked();
+    expect(screen.getByLabelText('PAYE tax code')).toHaveValue('1257L');
   });
 
   it('associates validation summary and inline errors with required fields', async () => {
